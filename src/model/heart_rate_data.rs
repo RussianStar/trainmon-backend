@@ -1,4 +1,5 @@
-pub struct hr_data {
+#[derive(Debug)]
+pub struct HrData {
     pub average: u8,
-    pub vec<f32> zone_percentages
+    pub zone_percentages: Vec<f32>
 }

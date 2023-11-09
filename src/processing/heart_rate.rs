@@ -1,8 +1,8 @@
 use fitparser::profile::MesgNum;
 
-use super::super::model;
+use crate::model;
 
-pub fn map_hr_zones(data: Vec<fitparser::FitDataRecord>, zones: Vec<u8>) -> model::heart_rate_data::hr_data {
+pub fn map_hr_zones(data: Vec<fitparser::FitDataRecord>, zones: Vec<u8>) -> model::heart_rate_data::HrData {
     let heart_rates: Vec<u32> = data.iter()
     .filter_map(|record| match record {
         fitparser::FitDataRecord { .. }  => {
@@ -23,7 +23,6 @@ pub fn map_hr_zones(data: Vec<fitparser::FitDataRecord>, zones: Vec<u8>) -> mode
                         }
                     },
                     None => {
-                        println!("Heart rate field not found");
                         None
                     }
                 }
@@ -56,7 +55,7 @@ pub fn map_hr_zones(data: Vec<fitparser::FitDataRecord>, zones: Vec<u8>) -> mode
         println!("Percentage of heart rates in zone {} ({}-{}): {:.2}%", i + 1, zones[i], zones[i + 1], percentage);
     }
 
-    model::heart_rate_data::hr_data {
+    model::heart_rate_data::HrData {
         average: average_heart_rate as u8,
         zone_percentages,
     }
