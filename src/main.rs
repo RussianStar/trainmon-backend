@@ -35,6 +35,17 @@ async fn main() {
     let heart_rate_data = processing::process::process_entries(semaphore, &paths, process).await;
     let heart_rate_data = heart_rate_data.into_iter().filter_map(|x| x).collect::<Vec<_>>();
     
-    println!("Heart rate data for all files: {:?}", heart_rate_data);
+    // Aggregate all the time in zones to get the total percentage in each zone
+    let mut total_time_in_zones = vec![0; zones.len()];
+    for data in &heart_rate_data {
+        for (i, time) in data.iter().enumerate() {
+            total_time_in_zones[i] += time;
+        }
+    }
+    let total_time = total_time_in_zones.iter().sum::<u32>() as f32;
+    let total_percentage_in_zones: Vec<f32> = total_time_in_zones.iter().map(|time| (*time as f32 / total_time) * 100.0).collect();
+    
+    //println!("Heart rate data for all files: {:?}", heart_rate_data);
+    println!("Total percentage in each zone: {:?}", total_percentage_in_zones);
     println!("Processing completed");
 }
