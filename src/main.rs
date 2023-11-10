@@ -22,30 +22,39 @@ async fn main() {
         .map(|e| e.path().to_str().unwrap().to_string())
         .collect::<Vec<String>>();
     
+    let zones: Vec<u8> = vec![0, 120, 145, 160, 172, 180, 255];
+    let analyzers: Vec<Box<dyn model::traits::Analyzer>> = vec![Box::new(processing::analyzers::HeartRateAnalyzer), Box::new(processing::analyzers::WorkoutAnalyzer)];
+
     let semaphore = Arc::new(Semaphore::new(num_cpus::get())); // Limiting concurrent processing to the number of cores
     let process = |file: String| async move {
         let data = processing::fit_parsing::parse_fit_file(&file).unwrap();
+        let mut results: Vec<model::enums::PartialResult> = Vec::new();
         if processing::fit_parsing::check_sport_in_data(&data, &[Sport::Cycling]) {
-            let zones: Vec<u8> = vec![0, 120, 145, 160, 172, 180, 255];
-            Some(processing::heart_rate::map_hr_zones(data, zones))
+            for dataslice in data {
+                for analyzer in &analyzers {
+                    if let Some(result) = analyzer.analyze(&dataslice) {
+                        results.push(result);
+                    }
+                }
+            }
+        }
+        results
+    };
+
+    let all_results = processing::process::process_entries(semaphore, &paths, process).await;
+
+    let results:  = all_results[0];
+
+    let final_result_a = {
+        let results_a: Vec<_> = results.iter()
+                                       .filter_map(|res| if let PartialResult::KindA(res_a) = res { Some(res_a) } else { None })
+                                       .collect();
+    
+        if results_a.is_empty() {
+            FinalResultA { average: 0.0 }
         } else {
-            None
+            let sum: f64 = results_a.iter().map(|res| res.some_numeric_field).sum();
+            FinalResultA { average: sum / results_a.len() as f64 }
         }
     };
-    let heart_rate_data = processing::process::process_entries(semaphore, &paths, process).await;
-    let heart_rate_data = heart_rate_data.into_iter().filter_map(|x| x).collect::<Vec<_>>();
-    
-    // Aggregate all the time in zones to get the total percentage in each zone
-    let mut total_time_in_zones = vec![0; zones.len()];
-    for data in &heart_rate_data {
-        for (i, time) in data.iter().enumerate() {
-            total_time_in_zones[i] += time;
-        }
-    }
-    let total_time = total_time_in_zones.iter().sum::<u32>() as f32;
-    let total_percentage_in_zones: Vec<f32> = total_time_in_zones.iter().map(|time| (*time as f32 / total_time) * 100.0).collect();
-    
-    //println!("Heart rate data for all files: {:?}", heart_rate_data);
-    println!("Total percentage in each zone: {:?}", total_percentage_in_zones);
-    println!("Processing completed");
 }
