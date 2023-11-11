@@ -5,6 +5,8 @@ use std::sync::Arc;
 
 use fitparser::profile::field_types::Sport;
 
+use crate::processing::analyzers::HeartRateAnalyzer::HeartRateAnalyzer;
+use crate::HeartRateAnalyzer;
 
 mod processing;
 mod model;
@@ -23,7 +25,7 @@ async fn main() {
         .collect::<Vec<String>>();
     
     let zones: Vec<u8> = vec![0, 120, 145, 160, 172, 180, 255];
-    let analyzers: Vec<Box<dyn model::traits::Analyzer>> = vec![Box::new(processing::analyzers::HeartRateAnalyzer), Box::new(processing::analyzers::WorkoutAnalyzer)];
+    let analyzers: Vec<Box<dyn model::traits::Analyzer>> =vec![Box::new(processing::analyzers::HeartRateAnalyzer)];
 
     let semaphore = Arc::new(Semaphore::new(num_cpus::get())); // Limiting concurrent processing to the number of cores
     let process = |file: String| async move {
@@ -43,18 +45,19 @@ async fn main() {
 
     let all_results = processing::process::process_entries(semaphore, &paths, process).await;
 
-    let results:  = all_results[0];
+    let results = all_results[0];
 
     let final_result_a = {
         let results_a: Vec<_> = results.iter()
-                                       .filter_map(|res| if let PartialResult::KindA(res_a) = res { Some(res_a) } else { None })
+                                .filter_map(|res| if let model::enums::PartialResult::HeartRateData(res_a) = res { Some(res_a) } else { None })
                                        .collect();
     
         if results_a.is_empty() {
-            FinalResultA { average: 0.0 }
+            model::heart_rate_data::HrData { current: 0, average: 0, zone_percentages: vec![] }
         } else {
-            let sum: f64 = results_a.iter().map(|res| res.some_numeric_field).sum();
-            FinalResultA { average: sum / results_a.len() as f64 }
+            let sum: u8 = results_a.iter().map(|res| res.current).sum();
+            let avg: f32 = (sum as f32) / (results_a.len() as f32);
+            model::heart_rate_data::HrData { average: avg.round() as u8, zone_percentages: vec![] }
         }
     };
 }
