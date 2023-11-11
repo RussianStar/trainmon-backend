@@ -1,4 +1,6 @@
 use super::heart_rate_data::HrData;
+use chrono::Utc;
+use fitparser::profile::field_types::DateTime;
 
 #[derive(Debug)]
 pub enum PartialResult{
@@ -14,6 +16,7 @@ pub struct PowerData{
 
 #[derive(Debug)]
 pub struct WorkoutSummary{
-//    date: chrono::NaiveDateTime,
-    pub date: u8
+    pub start: chrono::DateTime<Utc>,
+    pub end: chrono::DateTime<Utc>,
+    pub duration: u64
 }

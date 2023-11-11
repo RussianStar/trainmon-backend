@@ -5,8 +5,8 @@ use std::sync::Arc;
 
 use fitparser::profile::field_types::Sport;
 
-use crate::processing::analyzers::HeartRateAnalyzer::HeartRateAnalyzer;
-use crate::processing::analyzers::WorkoutAnalyzer::WorkoutAnalyzer;
+use crate::processing::analyzers::heart_rate_analyzer::HeartRateAnalyzer;
+use crate::processing::analyzers::workout_analyzer::WorkoutAnalyzer;
 
 mod processing;
 mod model;
