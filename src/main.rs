@@ -6,6 +6,7 @@ use std::sync::Arc;
 use fitparser::profile::field_types::Sport;
 
 use crate::processing::analyzers::HeartRateAnalyzer::HeartRateAnalyzer;
+use crate::processing::analyzers::WorkoutAnalyzer::WorkoutAnalyzer;
 
 mod processing;
 mod model;
@@ -24,7 +25,7 @@ async fn main() {
         .collect::<Vec<String>>();
     
     let zones: Vec<u8> = vec![0, 120, 145, 160, 172, 180, 255];
-    let analyzers: Vec<Arc<dyn model::traits::Analyzer + Send + Sync>> = vec![Arc::new(HeartRateAnalyzer)];
+    let analyzers: Vec<Arc<dyn model::traits::Analyzer + Send + Sync>> = vec![Arc::new(HeartRateAnalyzer), Arc::new(WorkoutAnalyzer)];
     let semaphore = Arc::new(Semaphore::new(num_cpus::get()));
     // Limiting concurrent processing to the number of cores
     let process = move |file: String| {
