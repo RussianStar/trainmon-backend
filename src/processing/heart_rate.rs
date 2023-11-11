@@ -57,6 +57,7 @@ pub fn map_hr_zones(data: Vec<fitparser::FitDataRecord>, zones: Vec<u8>) -> mode
 
     model::heart_rate_data::HrData {
         average: average_heart_rate as u8,
+        current: 0,
         zone_percentages,
     }
 }

@@ -6,7 +6,6 @@ use std::sync::Arc;
 use fitparser::profile::field_types::Sport;
 
 use crate::processing::analyzers::HeartRateAnalyzer::HeartRateAnalyzer;
-use crate::HeartRateAnalyzer;
 
 mod processing;
 mod model;
@@ -25,27 +24,30 @@ async fn main() {
         .collect::<Vec<String>>();
     
     let zones: Vec<u8> = vec![0, 120, 145, 160, 172, 180, 255];
-    let analyzers: Vec<Box<dyn model::traits::Analyzer>> =vec![Box::new(processing::analyzers::HeartRateAnalyzer)];
-
-    let semaphore = Arc::new(Semaphore::new(num_cpus::get())); // Limiting concurrent processing to the number of cores
-    let process = |file: String| async move {
-        let data = processing::fit_parsing::parse_fit_file(&file).unwrap();
-        let mut results: Vec<model::enums::PartialResult> = Vec::new();
-        if processing::fit_parsing::check_sport_in_data(&data, &[Sport::Cycling]) {
-            for dataslice in data {
-                for analyzer in &analyzers {
-                    if let Some(result) = analyzer.analyze(&dataslice) {
-                        results.push(result);
+    let analyzers: Vec<Arc<dyn model::traits::Analyzer + Send + Sync>> = vec![Arc::new(HeartRateAnalyzer)];
+    let semaphore = Arc::new(Semaphore::new(num_cpus::get()));
+    // Limiting concurrent processing to the number of cores
+    let process = move |file: String| {
+        let analyzers = analyzers.clone();
+        async move {
+            let data = processing::fit_parsing::parse_fit_file(&file).unwrap();
+            let mut results: Vec<model::enums::PartialResult> = Vec::new();
+            if processing::fit_parsing::check_sport_in_data(&data, &[Sport::Cycling]) {
+                for dataslice in data {
+                    for analyzer in &analyzers {
+                        if let Some(result) = analyzer.analyze(&dataslice) {
+                            results.push(result);
+                        }
                     }
                 }
             }
+            results
         }
-        results
     };
 
     let all_results = processing::process::process_entries(semaphore, &paths, process).await;
 
-    let results = all_results[0];
+    let results = &all_results[0];
 
     let final_result_a = {
         let results_a: Vec<_> = results.iter()
@@ -57,7 +59,10 @@ async fn main() {
         } else {
             let sum: u8 = results_a.iter().map(|res| res.current).sum();
             let avg: f32 = (sum as f32) / (results_a.len() as f32);
-            model::heart_rate_data::HrData { average: avg.round() as u8, zone_percentages: vec![] }
+            model::heart_rate_data::HrData { 
+                average: avg.round() as u8,
+                current:0,
+                zone_percentages: vec![] }
         }
     };
 }
