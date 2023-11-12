@@ -1,4 +1,3 @@
-use std::env;
 use num_cpus;
 use tokio::sync::Semaphore;
 use std::sync::Arc;
@@ -15,9 +14,7 @@ mod model;
 
 #[tokio::main]
 async fn main() {
-    //env::set_var("RUST_BACKTRACE", "1");
     println!("Starting main function");
-    let file = "C:\\Users\\TilmanRuß\\Downloads\\10429100379_ACTIVITY.fit";
 
     let paths = std::fs::read_dir("C:\\Users\\TilmanRuß\\Garmin")
         .unwrap()
@@ -27,7 +24,13 @@ async fn main() {
         .collect::<Vec<String>>();
     
     let analyzers: Vec<Arc<dyn model::traits::Analyzer + Send + Sync>> = vec![Arc::new(HeartRateAnalyzer), Arc::new(WorkoutAnalyzer)];
-    let semaphore = Arc::new(Semaphore::new(num_cpus::get()));
+    // Naive approach :
+    //let num_threads = num_cpus::get();
+    // using more threads improves performance for my small test sample. This is most likely due to the threads waiting for i/o.
+    // causing more problems : 
+    let num_threads = 83;
+    println!("Number of threads used : {}", num_threads);
+    let semaphore = Arc::new(Semaphore::new(num_threads));
     // Limiting concurrent processing to the number of cores
     let process = move |file: String| {
         let analyzers = analyzers.clone();
@@ -47,14 +50,19 @@ async fn main() {
         }
     };
 
+    let start_time_all = std::time::Instant::now();
     let all_results = processing::process::process_entries(semaphore, &paths, process).await;
+    let elapsed_time_all = start_time_all.elapsed();
+    println!("Total time for all paths: {:?}", elapsed_time_all);
+    println!("Total .fit files {}", paths.len());
+    println!("Average time per path: {:?}", elapsed_time_all / paths.len() as u32);
 
     for results in &all_results {        
         let zones: [u8; 7] = [0, 120, 145, 160, 172, 180, 255];
-        let final_result_hr = process_heart_rate_data(&results, &zones);
-        let overview = process_workout_summary(&results);
-        println!("{}",final_result_hr);
-        println!("{}", overview);
+        //let final_result_hr = process_heart_rate_data(&results, &zones);
+        //let overview = process_workout_summary(&results);
+        //println!("{}",final_result_hr);
+        //println!("{}", overview);
     }
 
 }

@@ -38,17 +38,16 @@ impl Analyzer for WorkoutAnalyzer {
                 _ => None,
             });
             
-           
-            let start_datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(start_date.unwrap(), 0));
-            let end_datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(end_date.unwrap(), 0));            
+            let start_datetime = Utc.timestamp(start_date.unwrap(), 0);
+            let end_datetime = Utc.timestamp(end_date.unwrap(), 0);
             let duration_as_seconds = duration.unwrap() as u64;
 //            println!("SPORT : {} : {}", sport.unwrap(),sub_sport.unwrap());
             return Some(PartialResult::WorkoutData(WorkoutSummary { 
                 start: start_datetime, 
                 end: end_datetime,
-                sport: sport.unwrap(),
+                sport: format!("{}::{}", sport.unwrap_or_else(|| "".to_string()), sub_sport.unwrap_or_else(|| "".to_string())),
                 duration: duration_as_seconds}));
         }
-None        
+    None        
     }
 }
