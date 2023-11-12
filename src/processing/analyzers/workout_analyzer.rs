@@ -40,21 +40,14 @@ impl Analyzer for WorkoutAnalyzer {
             
            
             let start_datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(start_date.unwrap(), 0));
-            let formatted_start_datetime = start_datetime.format("%d:%m:%y - %H:%M").to_string();
-            println!("Start date: {}", formatted_start_datetime);
-            
-            let end_datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(end_date.unwrap(), 0));
-            let formatted_end_datetime = end_datetime.format("%d:%m:%y - %H:%M").to_string();
-            println!("End date: {}", formatted_end_datetime);
-            
+            let end_datetime = Utc.from_utc_datetime(&NaiveDateTime::from_timestamp(end_date.unwrap(), 0));            
             let duration_as_seconds = duration.unwrap() as u64;
-            let hours = duration_as_seconds / 3600;
-            let minutes = (duration_as_seconds % 3600) / 60;
-            let seconds = duration_as_seconds % 60;
-            println!("Duration: {:02}:{:02}:{:02}", hours, minutes, seconds);
-
-            println!("SPORT : {} : {}", sport.unwrap(),sub_sport.unwrap());
-            return Some(PartialResult::WorkoutData(WorkoutSummary { start: start_datetime, end: end_datetime, duration: duration_as_seconds}));
+//            println!("SPORT : {} : {}", sport.unwrap(),sub_sport.unwrap());
+            return Some(PartialResult::WorkoutData(WorkoutSummary { 
+                start: start_datetime, 
+                end: end_datetime,
+                sport: sport.unwrap(),
+                duration: duration_as_seconds}));
         }
 None        
     }

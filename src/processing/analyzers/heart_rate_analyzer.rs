@@ -12,10 +12,11 @@ impl Analyzer for HeartRateAnalyzer {
                 fitparser::Value::UInt8(v) => Some(*v),
                 _ => None,
             });        
-        
-            println!("HeartRate : {}", heart_rate.unwrap() as u8); 
-        // Logic for HeartRateAnalyzer
-            return Some(PartialResult::HeartRateData(HrData { current: 0, average: 0, zone_percentages : vec![0.0;5]}));
+    
+            
+            if let Some(hr) = heart_rate {
+                return Some(PartialResult::HeartRateData(HrData { current: hr, average: 0, zone_percentages : vec![0.0;5]}));
+            }
         }
         None
     }
