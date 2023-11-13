@@ -1,16 +1,16 @@
 use fitparser;
 
-use crate::model::enums::PartialResult;
-use crate::model::enums::WorkoutSummary;
-use crate::model::traits::Analyzer;
+use crate::domain::model::partial::workout_summary::WorkoutSummary;
+use crate::domain::model::partial::partial_result::PartialResult;
+use crate::domain::core::user_model::UserModel;
+use crate::ports::analyzer::Analyzer;
 
-use chrono::NaiveDateTime;
 use chrono::TimeZone;
 use chrono::Utc;
 
 pub struct WorkoutAnalyzer;
 impl Analyzer for WorkoutAnalyzer {
-    fn analyze(&self, timeslice: &fitparser::FitDataRecord) -> Option<PartialResult> {
+    fn analyze(&self, timeslice: &fitparser::FitDataRecord, profile: &UserModel) -> Option<PartialResult> {
         // Logic for WorkoutAnalyzer
         if let fitparser::profile::MesgNum::Session = timeslice.kind() {
             let start_date = timeslice.fields().iter().find(|f| f.name() == "start_time").and_then(|f| match f.value() {
@@ -41,7 +41,7 @@ impl Analyzer for WorkoutAnalyzer {
             let start_datetime = Utc.timestamp(start_date.unwrap(), 0);
             let end_datetime = Utc.timestamp(end_date.unwrap(), 0);
             let duration_as_seconds = duration.unwrap() as u64;
-//            println!("SPORT : {} : {}", sport.unwrap(),sub_sport.unwrap());
+            
             return Some(PartialResult::WorkoutData(WorkoutSummary { 
                 start: start_datetime, 
                 end: end_datetime,

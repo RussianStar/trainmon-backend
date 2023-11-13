@@ -1,19 +1,5 @@
-use super::heart_rate_data::HrData;
-use std::fmt;
 use chrono::Utc;
-use fitparser::profile::field_types::DateTime;
-
-#[derive(Debug)]
-pub enum PartialResult{
-    PowerData(PowerData),
-    HeartRateData(HrData),
-    WorkoutData(WorkoutSummary)
-}
-
-#[derive(Debug)]
-pub struct PowerData{
-    pub current_power: u16
-}
+use std::fmt;
 
 #[derive(Debug)]
 pub struct WorkoutSummary{

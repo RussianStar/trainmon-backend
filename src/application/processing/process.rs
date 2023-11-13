@@ -2,14 +2,13 @@ use std::sync::Arc;
 use tokio::sync::Semaphore;
 use futures::future::join_all;
 use std::future::Future;
-
 use core::fmt::Debug;
 
 
 pub async fn process_entries<T, F, Fut>(semaphore: Arc<Semaphore>, entries: &[T], process: F) -> Vec<Fut::Output>
 where
 T: Send + Sync + 'static + Clone + Debug,
-F: Fn(T) -> Fut + Send + Sync + 'static + Clone,
+F: FnOnce(T) -> Fut + Send + Sync + 'static + Clone,
 Fut: Future + Send + 'static, 
 <Fut as Future>::Output: Send + Debug + 'static, 
 {
