@@ -17,6 +17,7 @@ use crate::application::analyzer::heart_rate_analyzer::HeartRateAnalyzer;
 use crate::application::analyzer::power_analyzer::PowerAnalyzer;
 
 use crate::domain::model::partial::partial_result::PartialResult;
+use crate::domain::model::results::general_result::GeneralResult;
 use crate::domain::core::user_model::UserModel;
 use crate::domain::model::results::analysis_result::AnalysisResult;
 use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
@@ -42,7 +43,7 @@ impl FitFileProcessor {
 }
 
 impl FitFileProcessingCommand for FitFileProcessor {
-    fn execute(self, file_paths: &Vec<String>, analysis_modes: Vec<String>, user_profile: UserModel) -> Pin<Box<dyn Future<Output = Vec<AnalysisResult>> + Send+ '_>> {
+    fn execute(self, file_paths: &Vec<String>, analysis_modes: Vec<String>, user_profile: UserModel) -> Pin<Box<dyn Future<Output = Vec<GeneralResult>> + Send+ '_>> {
 
         let user_profile_arc = Arc::new(user_profile.clone());
         let requested_analyzers = map_analysis_modes_to_analyzers(&analysis_modes).unwrap();
@@ -77,12 +78,22 @@ impl FitFileProcessingCommand for FitFileProcessor {
             };
 
             let all_partial_results = process_entries(semaphore, &file_paths, process).await;
-            let all_analysis_results: Vec<AnalysisResult> = all_partial_results.into_iter().flat_map(|partial_results| {
+            let all_analysis_results: Vec<GeneralResult> = all_partial_results.into_iter().map(|partial_results| {
                 let workout_summary = process_workout_summary(&partial_results);
                 let hr_data = process_heart_rate_data(&partial_results, &user_profile.hr_zones);
                 let pwr_data = process_power_data(&partial_results, &user_profile.pwr_zones);
 
-                vec![AnalysisResult::Overview(workout_summary), AnalysisResult::HeartRate(hr_data), AnalysisResult::Power(pwr_data)]
+                let mut results: Vec<AnalysisResult> = Vec::new();
+                if let Some(summary) = workout_summary {
+                    results.push(AnalysisResult::Overview(summary));
+                }
+                if let Some(hr) = hr_data {
+                    results.push(AnalysisResult::HeartRate(hr));
+                }
+                if let Some(pwr) = pwr_data {
+                    results.push(AnalysisResult::Power(pwr));
+                }
+                GeneralResult::new(results)
             }).collect();
 
             all_analysis_results

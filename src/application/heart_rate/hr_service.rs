@@ -1,7 +1,7 @@
 use crate::domain::model::partial::partial_result::PartialResult;
 use crate::domain::model::partial::heart_rate_data::HrData;
 
-pub fn process_heart_rate_data(results: &[PartialResult], zones: &[u8]) -> HrData {
+pub fn process_heart_rate_data(results: &[PartialResult], zones: &[u8]) -> Option<HrData> {
     let results_a: Vec<_> = results.iter()
         .filter_map(|res| {
             if let PartialResult::HeartRateData(res_a) = res {
@@ -14,7 +14,7 @@ pub fn process_heart_rate_data(results: &[PartialResult], zones: &[u8]) -> HrDat
         .collect();
 
     if results_a.is_empty() {
-       HrData { current: 0, average: 0, zone_percentages: vec![] }
+       None
     } else {
         let sum: u64 = results_a.iter().map(|res| res.current as u64).sum();
         let avg: f32 = (sum as f32) / (results_a.len() as f32);
@@ -27,9 +27,9 @@ pub fn process_heart_rate_data(results: &[PartialResult], zones: &[u8]) -> HrDat
             }
         }
         let zone_percentages: Vec<f32> = zone_counts.iter().map(|&count| (count as f32) / (results_a.len() as f32) * 100.0).collect();
-        HrData { 
+        Some(HrData { 
             average: avg.round() as u8,
             current:0,
-            zone_percentages: zone_percentages }
+            zone_percentages: zone_percentages })
     }
 }

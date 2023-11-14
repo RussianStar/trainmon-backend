@@ -40,12 +40,7 @@ async fn main() {
     let all =  processor.unwrap().execute(&paths, modes, profile).await;
 
     for result in all {
-        match result {
-            AnalysisResult::HeartRate(hr_data) => println!("HrData: {:?}", hr_data),
-            AnalysisResult::Overview(workout_summary) => println!("WorkoutSummary: {}", workout_summary),
-            AnalysisResult::Power(power) => println!("Power: {}", power),
-            _ => println!("Invalid")
-        }
+        println!("{}", result);
     }
 
     let elapsed_time_all = start_time_all.elapsed();

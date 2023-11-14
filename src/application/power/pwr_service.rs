@@ -1,6 +1,6 @@
 use crate::domain::model::partial::partial_result::PartialResult;
 use crate::domain::model::results::power_result::PowerResult;
-pub fn process_power_data(results: &[PartialResult], zones: &[u16]) -> PowerResult {
+pub fn process_power_data(results: &[PartialResult], zones: &[u16]) -> Option<PowerResult> {
     let results_a: Vec<_> = results.iter()
         .filter_map(|res| {
             if let PartialResult::PowerData(res_a) = res {
@@ -14,7 +14,7 @@ pub fn process_power_data(results: &[PartialResult], zones: &[u16]) -> PowerResu
 
 
     if results_a.is_empty() {
-       PowerResult { average: 0, weighted_average: 0, normalized: 0, time_in_zone: vec![], time_in_zone_effective: vec![] }
+        None
     } else {
         let sum: u64 = results_a.iter().map(|res| res.current_power as u64).sum();
         let avg: f32 = (sum as f32) / (results_a.len() as f32);
@@ -27,11 +27,11 @@ pub fn process_power_data(results: &[PartialResult], zones: &[u16]) -> PowerResu
             }
         }
         let time_in_zone: Vec<f32> = zone_counts.iter().map(|&count| (count as f32) / (results_a.len() as f32) * 100.0).collect();
-        PowerResult { 
+        Some(PowerResult { 
             average: avg.round() as u16,
             weighted_average: 0,
             normalized: 0,
             time_in_zone: time_in_zone,
-            time_in_zone_effective: vec![] }
+            time_in_zone_effective: vec![] })
     }
 }

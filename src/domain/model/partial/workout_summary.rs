@@ -11,6 +11,6 @@ pub struct WorkoutSummary{
 
 impl fmt::Display for WorkoutSummary {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Start: {}, End: {}, Duration: {}, Sport: {}", self.start, self.end, self.duration, self.sport)
+        write!(f, "Duration: {}, Sport: {}, Start: {}, End: {}", self.duration, self.sport , self.start, self.end )
     }
 }
