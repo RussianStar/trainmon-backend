@@ -960,6 +960,7 @@ dependencies = [
  "futures-util",
  "num_cpus",
  "pretty_env_logger",
+ "serde",
  "tokio",
  "tokio-stream",
  "warp",

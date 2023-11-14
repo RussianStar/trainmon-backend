@@ -1,4 +1,7 @@
 use std::fmt;
+use serde::Serialize;
+
+#[derive(Serialize)]
 pub struct PowerResult{
     pub average: u16,
     pub weighted_average: u16,

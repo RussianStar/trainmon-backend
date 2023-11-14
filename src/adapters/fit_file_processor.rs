@@ -32,18 +32,18 @@ use tokio::task::JoinHandle;
 
 pub struct FitFileProcessor{
     analyzers: Vec<Arc<dyn Analyzer + Send + Sync>>,
-    parser: FitParserAdapter
+    parser: Arc<FitParserAdapter>
 }
 
 impl FitFileProcessor {
-    pub fn new(analysis_modes: Vec<String>, parser: FitParserAdapter) -> Result<Self, Box<dyn Error>> {
+    pub fn new(analysis_modes: Vec<String>, parser: Arc<FitParserAdapter>) -> Result<Self, Box<dyn Error>> {
         let analyzers = map_analysis_modes_to_analyzers(&analysis_modes)?;
         Ok(Self { analyzers, parser })
     }
 }
 
 impl FitFileProcessingCommand for FitFileProcessor {
-    fn execute(self, file_paths: &Vec<String>, analysis_modes: Vec<String>, user_profile: UserModel) -> Pin<Box<dyn Future<Output = Vec<GeneralResult>> + Send+ '_>> {
+    fn execute(self, file_paths: &Vec<String>, analysis_modes: Vec<String>, user_profile: UserModel) -> Pin<Box<dyn Future<Output = Vec<GeneralResult>> + Send + '_>> {
 
         let user_profile_arc = Arc::new(user_profile.clone());
         let requested_analyzers = map_analysis_modes_to_analyzers(&analysis_modes).unwrap();
