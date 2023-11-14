@@ -19,8 +19,7 @@ impl fmt::Display for GeneralResult {
             match result {
                 AnalysisResult::HeartRate(hr_data) => writeln!(f, "HEART: {}", hr_data),
                 AnalysisResult::Overview(workout_summary) => writeln!(f, "TOTAL: {}", workout_summary),
-                AnalysisResult::Power(power) => writeln!(f, "POWER: {}", power),
-                _ => write!(f, "Invalid")
+                AnalysisResult::Power(power) => writeln!(f, "POWER: {}", power)
             }?;
         }
         Ok(())

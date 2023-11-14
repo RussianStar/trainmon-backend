@@ -10,7 +10,7 @@ use chrono::Utc;
 
 pub struct WorkoutAnalyzer;
 impl Analyzer for WorkoutAnalyzer {
-    fn analyze(&self, timeslice: &fitparser::FitDataRecord, profile: &UserModel) -> Option<PartialResult> {
+    fn analyze(&self, timeslice: &fitparser::FitDataRecord, _profile: &UserModel) -> Option<PartialResult> {
         // Logic for WorkoutAnalyzer
         if let fitparser::profile::MesgNum::Session = timeslice.kind() {
             let start_date = timeslice.fields().iter().find(|f| f.name() == "start_time").and_then(|f| match f.value() {
@@ -38,8 +38,8 @@ impl Analyzer for WorkoutAnalyzer {
                 _ => None,
             });
             
-            let start_datetime = Utc.timestamp(start_date.unwrap(), 0);
-            let end_datetime = Utc.timestamp(end_date.unwrap(), 0);
+            let start_datetime = Utc.timestamp_opt(start_date.unwrap(), 0).unwrap();
+            let end_datetime = Utc.timestamp_opt(end_date.unwrap(), 0).unwrap();
             let duration_as_seconds = duration.unwrap() as u64;
             
             return Some(PartialResult::WorkoutData(WorkoutSummary { 

@@ -38,7 +38,7 @@ async fn main() {
             };
 
             let parser = FitParserAdapter::new().into();
-            let processor = FitFileProcessor::new(modes_clone.clone(),parser).unwrap();
+            let processor = FitFileProcessor::new(parser).unwrap();
 
             let all: Vec<GeneralResult> =  processor.execute(&paths_clone, modes_clone, profile).await;
             println!("Processor execution finished.");

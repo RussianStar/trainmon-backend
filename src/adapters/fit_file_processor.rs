@@ -1,45 +1,42 @@
 
-use tokio::sync::Semaphore;
-use std::sync::Arc;
-use crate::ports::fit_file_parser::FitFileParser;
-use crate::adapters::fit_parser_adapter::FitParserAdapter;
-use crate::ports::analyzer::Analyzer;
 use std::error::Error;
-use num_cpus;
-
+use std::future::Future;
+use std::sync::Arc;
+use std::pin::Pin;
 use std::collections::HashMap;
+
+use tokio::sync::Semaphore;
+use num_cpus;
 
 use fitparser::profile::field_types::Sport;
 
-use crate::application::processing::process::process_entries;
+use crate::adapters::fit_parser_adapter::FitParserAdapter;
+
+use crate::ports::fit_file_parser::FitFileParser;
+use crate::ports::analyzer::Analyzer;
+use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
 use crate::application::analyzer::workout_analyzer::WorkoutAnalyzer;
 use crate::application::analyzer::heart_rate_analyzer::HeartRateAnalyzer;
 use crate::application::analyzer::power_analyzer::PowerAnalyzer;
+use crate::application::processing::process::process_entries;
+use crate::application::heart_rate::hr_service::process_heart_rate_data;
+use crate::application::workout::workout_service::process_workout_summary;
+use crate::application::power::pwr_service::process_power_data;
 
 use crate::domain::model::partial::partial_result::PartialResult;
 use crate::domain::model::results::general_result::GeneralResult;
 use crate::domain::core::user_model::UserModel;
 use crate::domain::model::results::analysis_result::AnalysisResult;
-use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
-use crate::application::heart_rate::hr_service::process_heart_rate_data;
-use crate::application::workout::workout_service::process_workout_summary;
-use crate::application::power::pwr_service::process_power_data;
-
-use std::future::Future;
-use std::pin::Pin;
-use tokio::task::JoinHandle;
 
 pub struct FitFileProcessor{
-    analyzers: Vec<Arc<dyn Analyzer + Send + Sync>>,
     parser: Arc<FitParserAdapter>
 }
 
 impl FitFileProcessor {
-    pub fn new(analysis_modes: Vec<String>, parser: Arc<FitParserAdapter>) -> Result<Self, Box<dyn Error>> {
-        let analyzers = map_analysis_modes_to_analyzers(&analysis_modes)?;
-        Ok(Self { analyzers, parser })
+    pub fn new(parser: Arc<FitParserAdapter>) -> Result<Self, Box<dyn Error>> {
+        Ok(Self { parser })
     }
 }
 

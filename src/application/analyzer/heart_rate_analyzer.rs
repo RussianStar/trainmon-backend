@@ -6,7 +6,7 @@ use crate::ports::analyzer::Analyzer;
 pub struct HeartRateAnalyzer;
 
 impl Analyzer for HeartRateAnalyzer {
-    fn analyze(&self, timeslice: &fitparser::FitDataRecord, profile: &UserModel) -> Option<PartialResult> {
+    fn analyze(&self, timeslice: &fitparser::FitDataRecord, _profile: &UserModel) -> Option<PartialResult> {
 
         if let fitparser::profile::MesgNum::Record = timeslice.kind() {
             let heart_rate = timeslice.fields().iter().find(|f| f.name() == "heart_rate").and_then(|f| match f.value() {
