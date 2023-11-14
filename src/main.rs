@@ -17,7 +17,6 @@ use warp::Filter;
 
 #[tokio::main]
 async fn main() {
-    println!("Starting main function");
     let analyze = warp::path!("analyze")
     .and(warp::post())
     .and(warp::body::json::<HashMap<String, Vec<String>>>())
@@ -25,23 +24,28 @@ async fn main() {
         let paths = body.get("paths").unwrap_or(&Vec::new()).clone();
         let modes = body.get("modes").unwrap_or(&Vec::new()).clone();
 
-            let paths_clone = paths.clone();
-            let modes_clone = modes.clone();
+        println!("Received paths: {:?}", paths);
+        println!("Received modes: {:?}", modes);
+
+        let paths_clone = paths.clone();
+        let modes_clone = modes.clone();
             
-            async move {
-                let profile: UserModel  = UserModel{
-                    name: String::from("test"), 
-                    hr_zones: vec![0,120,145,160,170,185,255],
-                    pwr_zones: vec![0,120,165,210,250,300,350,3000]
-                };
+        async move {
+            let profile: UserModel  = UserModel{
+                name: String::from("test"), 
+                hr_zones: vec![0,120,145,160,170,185,255],
+                pwr_zones: vec![0,120,165,210,250,300,350,3000]
+            };
 
-                let parser = FitParserAdapter::new().into();
-                let processor = FitFileProcessor::new(modes_clone.clone(),parser).unwrap();
+            let parser = FitParserAdapter::new().into();
+            let processor = FitFileProcessor::new(modes_clone.clone(),parser).unwrap();
 
-                let all: Vec<GeneralResult> =  processor.execute(&paths_clone, modes_clone, profile).await;
-                Ok::<_, warp::Rejection>(warp::reply::json(&all))
-            }
-        });
+            let all: Vec<GeneralResult> =  processor.execute(&paths_clone, modes_clone, profile).await;
+            println!("Processor execution finished.");
+            Ok::<_, warp::Rejection>(warp::reply::json(&all))
+        }
+    });
 
+    println!("Server is running at http://127.0.0.1:3030");
     warp::serve(analyze).run(([127, 0, 0, 1], 3030)).await;
 }

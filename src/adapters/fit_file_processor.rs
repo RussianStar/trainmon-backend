@@ -5,6 +5,7 @@ use crate::ports::fit_file_parser::FitFileParser;
 use crate::adapters::fit_parser_adapter::FitParserAdapter;
 use crate::ports::analyzer::Analyzer;
 use std::error::Error;
+use num_cpus;
 
 use std::collections::HashMap;
 
@@ -49,7 +50,7 @@ impl FitFileProcessingCommand for FitFileProcessor {
         let requested_analyzers = map_analysis_modes_to_analyzers(&analysis_modes).unwrap();
 
         Box::pin(async move {
-            let num_threads = 83;
+            let num_threads = num_cpus::get() * 8;
             println!("Number of threads used : {}", num_threads);
             // Limiting concurrent processing to the number of cores
             let semaphore = Arc::new(Semaphore::new(num_threads));
