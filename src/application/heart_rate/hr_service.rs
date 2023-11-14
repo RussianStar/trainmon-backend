@@ -7,7 +7,7 @@ pub fn process_heart_rate_data(results: &[PartialResult], zones: &[u8]) -> HrDat
             if let PartialResult::HeartRateData(res_a) = res {
                 Some(res_a)
             } else {
-                println!("Debug: No HeartRateData found in results");
+                //println!("Debug: No HeartRateData found in results");
                 None
             }
         })

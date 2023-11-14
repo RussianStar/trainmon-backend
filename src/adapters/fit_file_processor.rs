@@ -23,6 +23,7 @@ use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
 use crate::application::heart_rate::hr_service::process_heart_rate_data;
 use crate::application::workout::workout_service::process_workout_summary;
+use crate::application::power::pwr_service::process_power_data;
 
 use std::future::Future;
 use std::pin::Pin;
@@ -79,8 +80,9 @@ impl FitFileProcessingCommand for FitFileProcessor {
             let all_analysis_results: Vec<AnalysisResult> = all_partial_results.into_iter().flat_map(|partial_results| {
                 let workout_summary = process_workout_summary(&partial_results);
                 let hr_data = process_heart_rate_data(&partial_results, &user_profile.hr_zones);
+                let pwr_data = process_power_data(&partial_results, &user_profile.pwr_zones);
 
-                vec![AnalysisResult::Overview(workout_summary), AnalysisResult::HeartRate(hr_data)]
+                vec![AnalysisResult::Overview(workout_summary), AnalysisResult::HeartRate(hr_data), AnalysisResult::Power(pwr_data)]
             }).collect();
 
             all_analysis_results
