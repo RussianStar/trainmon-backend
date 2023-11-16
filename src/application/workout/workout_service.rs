@@ -16,10 +16,12 @@ pub fn process_workout_summary(results: &[PartialResult]) -> Option<WorkoutSumma
         None
     } else {
         let start = results_a.first().unwrap().start;
+        let distance = results_a.first().unwrap().distance;
         let end = results_a.last().unwrap().end;
         let duration = (end - start).num_seconds() as u64;
         let sport = results_a.first().unwrap().sport.clone();
         Some(WorkoutSummary {
+            distance: distance,
             start: start,
             end: end,
             duration: duration,

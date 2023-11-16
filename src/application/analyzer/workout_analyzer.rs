@@ -32,7 +32,12 @@ impl Analyzer for WorkoutAnalyzer {
                 fitparser::Value::String(v) => Some(v.clone()),
                 _ => None,
             });
-            
+
+            let distance = timeslice.fields().iter().find(|f| f.name() == "total_distance").and_then(|f| match f.value() {
+                fitparser::Value::Float64(v) => Some(*v),
+                _ => None,
+            });
+
             let sub_sport = timeslice.fields().iter().find(|f| f.name() == "sub_sport").and_then(|f| match f.value() {
                 fitparser::Value::String(v) => Some(v.clone()),
                 _ => None,
@@ -43,6 +48,7 @@ impl Analyzer for WorkoutAnalyzer {
             let duration_as_seconds = duration.unwrap() as u64;
             
             return Some(PartialResult::WorkoutData(WorkoutSummary { 
+                distance: distance.unwrap_or(0.),
                 start: start_datetime, 
                 end: end_datetime,
                 sport: format!("{}::{}", sport.unwrap_or_else(|| "".to_string()), sub_sport.unwrap_or_else(|| "".to_string())),
