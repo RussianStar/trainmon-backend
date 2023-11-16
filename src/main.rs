@@ -46,6 +46,13 @@ async fn main() {
         }
     });
 
+    let cors = warp::cors()
+        .allow_any_origin() 
+        .allow_methods(vec!["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+        .allow_headers(vec!["Content-Type", "Authorization", "Access-Control-Allow-Origin"]);
+
+    let routes = analyze.with(cors);
+
     println!("Server is running at http://127.0.0.1:3030");
-    warp::serve(analyze).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
