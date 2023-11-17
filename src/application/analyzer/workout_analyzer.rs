@@ -38,10 +38,10 @@ impl Analyzer for WorkoutAnalyzer {
                 _ => None,
             });
 
-            let tss = timeslice.fields().iter().find(|f| f.name() == "TSS").and_then(|f| match f.value() {
-                fitparser::Value::UInt16(v) => Some(*v),
+            let tss = timeslice.fields().iter().find(|f| f.name() == "training_stress_score").and_then(|f| match f.value() {
+                fitparser::Value::Float64(v) => Some(*v),
                 _ => None,
-            }).unwrap_or(0);
+            }).unwrap_or(0.0);
 
 
             let sub_sport = timeslice.fields().iter().find(|f| f.name() == "sub_sport").and_then(|f| match f.value() {

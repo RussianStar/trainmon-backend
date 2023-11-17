@@ -9,7 +9,7 @@ pub struct WorkoutSummary{
     pub duration: u64,
     pub sport: std::string::String,
     pub distance: f64,
-    pub tss: u16
+    pub tss: f64
 }
 
 impl fmt::Display for WorkoutSummary {
