@@ -30,6 +30,7 @@ use crate::domain::core::user_model::UserModel;
 use crate::domain::model::results::analysis_result::AnalysisResult;
 
 
+#[derive(Clone)]
 pub struct FitFileProcessor{
     parser: Arc<FitParserAdapter>
 }

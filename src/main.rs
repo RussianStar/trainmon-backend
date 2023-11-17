@@ -18,13 +18,13 @@ use sqlx::postgres::PgPoolOptions;
 
 #[tokio::main]
 async fn main() {
-    let database_url = std::env::var("DATABASE_CONNECTION")
-                .expect("Database connection is missing");
+    //let database_url = std::env::var("DATABASE_CONNECTION")
+      //          .expect("Database connection is missing");
     
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
-        .await?;
+    //let pool = PgPoolOptions::new()
+      //  .max_connections(5)
+        //.connect(&database_url)
+        //.await;
 
 
     let analyze = warp::path!("analyze")
