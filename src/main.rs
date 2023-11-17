@@ -14,9 +14,19 @@ use crate::adapters::fit_parser_adapter::FitParserAdapter;
 use crate::adapters::fit_file_processor::FitFileProcessor;
 
 use warp::Filter;
+use sqlx::postgres::PgPoolOptions;
 
 #[tokio::main]
 async fn main() {
+    let database_url = std::env::var("DATABASE_CONNECTION")
+                .expect("Database connection is missing");
+    
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await?;
+
+
     let analyze = warp::path!("analyze")
     .and(warp::post())
     .and(warp::body::json::<HashMap<String, Vec<String>>>())

@@ -21,8 +21,8 @@ impl Vlamax for VLaMaxEstimator {
         }
 
         // Estimating longer duration degrades data quality and is not wise.
-        if sample.len() > self.max_duration.into() {
-            return Err("Sample to long.");
+        if sample.len() > self.max_duration as usize {
+            return Err("Sample too long.");
         }
 
         let x = DVector::from_vec((1..=sample.len()).map(|i| i as f64).collect());
