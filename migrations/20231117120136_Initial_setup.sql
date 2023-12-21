@@ -28,7 +28,3 @@ CREATE TABLE power_data (
     time_in_zone_effective INTERVAL NOT NULL
 );
 
--- Down
-DROP TABLE power_data;
-DROP TABLE heart_rate_data;
-DROP TABLE workouts;
