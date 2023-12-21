@@ -7,9 +7,6 @@ pub struct VLaMaxEstimator{
     max_duration: u8
 }
 impl VLaMaxEstimator {
-    pub fn new() -> Self{
-        Self { max_duration: u8::MAX }
-    }
 }
 
 impl Vlamax for VLaMaxEstimator {

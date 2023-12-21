@@ -1,11 +1,12 @@
 use serde::Serialize;
+use serde::Deserialize;
 
-#[derive(Serialize)]
+#[derive(Serialize,Deserialize)]
 pub struct HeartRateResult{
-    average: u8,
-    time_in_zone: Vec<f32>,
-    average_effective: u8,
-    time_in_zone_effective: Vec<f32>,
+    pub average: u8,
+    pub time_in_zone: Vec<f32>,
+    pub average_effective: u8,
+    pub time_in_zone_effective: Vec<f32>,
 }
 
 impl HeartRateResult {

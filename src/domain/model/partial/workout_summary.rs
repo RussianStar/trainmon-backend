@@ -2,7 +2,8 @@ use chrono::Utc;
 use std::fmt;
 
 use serde::Serialize;
-#[derive(Debug,Serialize)]
+use serde::Deserialize;
+#[derive(Debug,Serialize, Deserialize)]
 pub struct WorkoutSummary{
     pub start: chrono::DateTime<Utc>,
     pub end: chrono::DateTime<Utc>,

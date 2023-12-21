@@ -1,10 +1,11 @@
 use std::fmt;
 use crate::domain::model::results::analysis_result::AnalysisResult;
 use serde::Serialize;
+use serde::Deserialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct GeneralResult{
-    results: Vec<AnalysisResult>
+    pub results: Vec<AnalysisResult>
 }
 
 impl GeneralResult {
