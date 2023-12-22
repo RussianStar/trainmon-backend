@@ -1,15 +1,15 @@
 use axum::{extract, http};
 use sqlx::PgPool;
-use crate::domain::core::user_model::UserModel;
 
-
-use crate::domain::model::results::general_result::GeneralResult;
+use crate::application::helper::uuid::{create_uuid, create_test_user_id};
 
 use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
 use crate::adapters::fit_parser_adapter::FitParserAdapter;
 use crate::adapters::fit_file_processor::FitFileProcessor;
 
+use crate::domain::core::user_model::UserModel;
+use crate::domain::model::results::general_result::GeneralResult;
 use crate::domain::model::http::http_analysis_request::HttpAnalysisRequest;
 use crate::domain::model::http::http_analysis_result::HttpAnalysisResult;
 use crate::domain::model::results::analysis_result::AnalysisResult;
@@ -32,7 +32,7 @@ pub async fn analyze(
                 name: String::from("test"), 
                 hr_zones: vec![0,120,145,160,170,185,255],
                 pwr_zones: vec![0,120,165,210,250,300,350,3000]
-            };
+            };  
 
             let parser = FitParserAdapter::new().into();
             let processor = FitFileProcessor::new(parser).unwrap();
@@ -55,9 +55,8 @@ pub async fn create_records(
 ) -> Result<(http::StatusCode, axum::Json<i32>), http::StatusCode> {
 
     for result in &payload.data {
-
-        let unique_id = "123".to_string();
-        let user_id = 1;
+        let unique_id = create_uuid(&result);
+        let user_id = create_test_user_id();
 
         for analysis_result in &result.results {
             match analysis_result {
@@ -71,28 +70,36 @@ pub async fn create_records(
                         .bind(&user_id)
                         .bind(&workout_summary.start)
                         .bind(&workout_summary.end)
-                        .bind(&(workout_summary.duration as i32))
+                        .bind(&sqlx::postgres::types::PgInterval { months: 0, days: 0, microseconds: workout_summary.duration as i64 * 1_000_000 })
                         .bind(&workout_summary.sport)
-                        .bind(&(workout_summary.distance as f32))
-                        .bind(&(workout_summary.tss as i32))
+                        .bind(&(workout_summary.distance as f64))
+                        .bind(&(workout_summary.tss as f64))
                         .execute(&pool)
                         .await
-                        .map_err(|_| http::StatusCode::INTERNAL_SERVER_ERROR)?;
+                        .map_err(|err| {
+                            eprintln!("Database error: {}", err);
+                            http::StatusCode::INTERNAL_SERVER_ERROR
+                        })?;
                 },
                 AnalysisResult::HeartRate(heart_rate_result) => {
+
+                    println!("This is the result : {:?}", heart_rate_result.time_in_zone.iter().map(|f| *f as i32).collect::<Vec<i32>>());
                     sqlx::query(
                         r#"
-                        INSERT INTO heart_rate_data (workout_id, average, time_in_zone, average_effective, time_in_zone_effective)
+                        INSERT INTO heart_rate_data (workout_id, average,  average_effective,time_in_zone, time_in_zone_effective)
                         VALUES ($1, $2, $3, $4, $5)
                         "#)
                         .bind(&unique_id)
                         .bind(&(heart_rate_result.average as i32))
                         .bind(&(heart_rate_result.average_effective as i32))
-                        .bind(&heart_rate_result.time_in_zone)
-                        .bind(&heart_rate_result.time_in_zone_effective)
+                        .bind(&heart_rate_result.time_in_zone.iter().map(|f| *f as i32).collect::<Vec<i32>>())
+                        .bind(&heart_rate_result.time_in_zone_effective.iter().map(|f| *f as i32).collect::<Vec<i32>>())
                         .execute(&pool)
                         .await
-                        .map_err(|_| http::StatusCode::INTERNAL_SERVER_ERROR)?;
+                        .map_err(|err| {
+                            eprintln!("Database error: {}", err);
+                            http::StatusCode::INTERNAL_SERVER_ERROR
+                        })?;
 
                 },
                 AnalysisResult::Power(power_result) => {
@@ -109,7 +116,10 @@ pub async fn create_records(
                         .bind(&power_result.time_in_zone_effective)
                         .execute(&pool)
                         .await
-                        .map_err(|_| http::StatusCode::INTERNAL_SERVER_ERROR)?;
+                        .map_err(|err| {
+                            eprintln!("Database error: {}", err);
+                            http::StatusCode::INTERNAL_SERVER_ERROR
+                        })?;
                 },
             }
         }

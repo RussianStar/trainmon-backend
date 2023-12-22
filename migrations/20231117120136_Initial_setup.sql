@@ -12,19 +12,19 @@ CREATE TABLE workouts (
 );
 
 CREATE TABLE heart_rate_data (
-    workout_id UUID REFERENCES workouts(id),
+    workout_id UUID REFERENCES workouts(id) ON DELETE CASCADE,
     average NUMERIC NOT NULL,
-    time_in_zone INTERVAL NOT NULL,
+    time_in_zone NUMERIC[] NOT NULL
     average_effective NUMERIC NOT NULL,
-    time_in_zone_effective INTERVAL NOT NULL
+    time_in_zone_effective NUMERIC[] NOT NULL
 );
 
 CREATE TABLE power_data (
-    workout_id UUID REFERENCES workouts(id),
+    workout_id UUID REFERENCES workouts(id) ON DELETE CASCADE,
     average NUMERIC NOT NULL,
     weighted_average NUMERIC NOT NULL,
     normalized NUMERIC NOT NULL,
-    time_in_zone INTERVAL NOT NULL,
-    time_in_zone_effective INTERVAL NOT NULL
+    time_in_zone NUMERIC[] NOT NULL
+    time_in_zone_effective NUMERIC[] NOT NULL
 );
 

@@ -63,7 +63,8 @@ impl FitFileProcessingCommand for FitFileProcessor {
                 async move {
                     let data = parser.parse_fit_file(&file).unwrap();
                     let mut results: Vec<PartialResult> = Vec::new();
-                    if parser.check_sport_in_data(&data, &[Sport::Cycling]) {
+                    if parser.check_sport_in_data(&data,
+                         &[Sport::Cycling, Sport::Rowing, Sport::Running, Sport::Training]) {
                         for dataslice in data {
                             for analyzer in &requested_analyzers {
                                 if let Some(result) = analyzer.analyze(&dataslice, &user_profile) {
@@ -111,7 +112,6 @@ fn map_analysis_modes_to_analyzers(analysis_modes: &Vec<String>) -> Result<Vec<A
     
     let mut result = Vec::new();
     for mode in analysis_modes.iter() {
-        // Use `mode` directly since it's already a &str
         match analyzers.get(mode) {
             Some(analyzer) => result.push(analyzer.clone()),
             None => return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid analysis mode"))),

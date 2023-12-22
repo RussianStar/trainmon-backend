@@ -27,7 +27,7 @@ impl FitFileParser for FitParserAdapter {
     }
     fn check_sport_in_data(&self, data: &[fitparser::FitDataRecord], sports: &[Sport]) -> bool {
         data.iter().any(|record| {
-                if record.kind() == MesgNum::Sport {
+                if record.kind() == MesgNum::Sport || record.kind() == MesgNum::Session {
                     let sport_field = record.fields().iter()
                         .find(|field| field.name() == "sport");
                     match sport_field {
