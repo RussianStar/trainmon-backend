@@ -5,20 +5,29 @@ Ziel :
 
 ## Architektur
 
-[] Führe Ports und Adapter Struktur ein
-[] Teile auf in use cases
-[] Verstecke Domänenlogik vor den Adaptern
 
 ## Refactor
 
-[] Abstrahiere die Auswertung/Aggregation in generische Funktion (vlt auch via trait ?)
 
 ## Features
 
-[] Power Analysis Durchschnitt, gewichteter Durchschnitt, Zeit in Zonen
+[] Power Analysis , gewichteter Durchschnitt
 [] 'Effective X' where X has Zones and transitations use a weighted exponential decay to consider past values
 [] 'Effective time in zone' zB. wie lange war ich tatsächlich in Zone2
 [] Time dependend map for zones
 [] vo2 estimate
 [] Fehler für alle fehlerbehafteten größen
+[] endpoints für daten einlesen : oura/metriken
+[] endpoint für neue Daten sind da
+[] python service der neue Daten via tp lädt
+
+## Visuals
+
+[] htmx basis
+[] button für update via python
+[] zweistuffiges interaktives update : erst python dann import
+[] htmx plots via images, nice !
+[] plot effizienzmaß vo2 pro TSS
+
+
 
