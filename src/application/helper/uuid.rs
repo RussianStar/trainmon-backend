@@ -9,7 +9,3 @@ pub fn create_uuid(result: &GeneralResult) -> Uuid {
 
     Uuid::new_v5(&namespace, data.as_bytes())
 }
-
-pub fn create_test_user_id() -> Uuid {
-    return Uuid::new_v5(&Uuid::NAMESPACE_DNS, "tilman".as_bytes());
-}

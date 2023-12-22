@@ -6,11 +6,10 @@ mod application;
 use axum::routing::{post, Router};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
-use adapters::database_adapter::{analyze, create_records};
+use adapters::database_adapter::{analyze, create_records,full};
 
 #[tokio::main]
 async fn main() {
-
     let port = std::env::var("PORT").unwrap_or_else(|_| "3030".to_string());
     let addr = format!("0.0.0.0:{}", port);
 
@@ -25,6 +24,7 @@ async fn main() {
     let app = Router::new()
         .route("/analyze", post(analyze))
         .route("/analyze/create", post(create_records))
+        .route("/analyze/full", post(full))
         .with_state(pool);
 
     axum::Server::bind(&addr.parse().unwrap())

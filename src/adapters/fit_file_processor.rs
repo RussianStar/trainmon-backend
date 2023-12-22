@@ -28,6 +28,9 @@ use crate::domain::model::partial::partial_result::PartialResult;
 use crate::domain::model::results::general_result::GeneralResult;
 use crate::domain::core::user_model::UserModel;
 use crate::domain::model::results::analysis_result::AnalysisResult;
+use crate::domain::model::http::file_provider_option::FileProviderOption;
+
+use super::file_provider;
 
 
 #[derive(Clone)]
@@ -42,14 +45,17 @@ impl FitFileProcessor {
 }
 
 impl FitFileProcessingCommand for FitFileProcessor {
-    fn execute(self, file_paths: &Vec<String>, analysis_modes: Vec<String>, user_profile: UserModel) -> Pin<Box<dyn Future<Output = Vec<GeneralResult>> + Send + '_>> {
+    fn execute(self, file_provider_options: &FileProviderOption, analysis_modes: Vec<String>, user_profile: UserModel) -> Pin<Box<dyn Future<Output = Vec<GeneralResult>> + Send + '_>> {
 
         let user_profile_arc = Arc::new(user_profile.clone());
         let requested_analyzers = map_analysis_modes_to_analyzers(&analysis_modes).unwrap();
 
+        let file_paths: Vec<String> =  file_provider::provide_files(file_provider_options).expect("Couldnt create files for option.");
+        println!("Found valid paths : {}", file_paths.len());
+        
         Box::pin(async move {
-            let num_threads = num_cpus::get() * 8;
-            println!("Number of threads used : {}", num_threads);
+            let num_threads = num_cpus::get() * 8 * 8;
+            println!("Maximum number of threads used : {}", num_threads);
             // Limiting concurrent processing to the number of cores
             let semaphore = Arc::new(Semaphore::new(num_threads));
 
@@ -78,7 +84,7 @@ impl FitFileProcessingCommand for FitFileProcessor {
             };
 
             let all_partial_results = process_entries(semaphore, &file_paths, process).await;
-            let all_analysis_results: Vec<GeneralResult> = all_partial_results.into_iter().map(|partial_results| {
+            let all_analysis_results: Vec<GeneralResult> = all_partial_results.into_iter().filter_map(|partial_results| {
                 let workout_summary = process_workout_summary(&partial_results);
                 let hr_data = process_heart_rate_data(&partial_results, &user_profile.hr_zones);
                 let pwr_data = process_power_data(&partial_results, &user_profile.pwr_zones);
@@ -93,9 +99,16 @@ impl FitFileProcessingCommand for FitFileProcessor {
                 if let Some(pwr) = pwr_data {
                     results.push(AnalysisResult::Power(pwr));
                 }
-                GeneralResult::new(results)
+                if !results.is_empty() {
+                    Some(GeneralResult::new(results))
+                } else {
+                    None
+                }
             }).collect();
 
+
+            
+            println!("Found {} results", all_analysis_results.len());
             all_analysis_results
         })
     }
