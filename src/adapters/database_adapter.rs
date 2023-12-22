@@ -59,9 +59,14 @@ pub async fn create_records(
         let user_id = create_test_user_id();
 
         for analysis_result in &result.results {
+            let mut transaction = pool.begin().await.map_err(|err| {
+                eprintln!("Database error: {}", err);
+                http::StatusCode::INTERNAL_SERVER_ERROR
+            })?;
+
             match analysis_result {
                 AnalysisResult::Overview(workout_summary) => {
-                    sqlx::query(
+                    let query_result = sqlx::query(
                         r#"
                         INSERT INTO workouts (id, user_id, start_time, end_time, duration, sport, distance, tss)
                         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -74,17 +79,16 @@ pub async fn create_records(
                         .bind(&workout_summary.sport)
                         .bind(&(workout_summary.distance as f64))
                         .bind(&(workout_summary.tss as f64))
-                        .execute(&pool)
-                        .await
-                        .map_err(|err| {
-                            eprintln!("Database error: {}", err);
-                            http::StatusCode::INTERNAL_SERVER_ERROR
-                        })?;
+                        .execute(&mut *transaction)
+                        .await;
+
+                    if let Err(err) = query_result {
+                        eprintln!("Database error: {}", err);
+                        continue;
+                    }
                 },
                 AnalysisResult::HeartRate(heart_rate_result) => {
-
-                    println!("This is the result : {:?}", heart_rate_result.time_in_zone.iter().map(|f| *f as i32).collect::<Vec<i32>>());
-                    sqlx::query(
+                    let query_result = sqlx::query(
                         r#"
                         INSERT INTO heart_rate_data (workout_id, average,  average_effective,time_in_zone, time_in_zone_effective)
                         VALUES ($1, $2, $3, $4, $5)
@@ -94,16 +98,17 @@ pub async fn create_records(
                         .bind(&(heart_rate_result.average_effective as i32))
                         .bind(&heart_rate_result.time_in_zone.iter().map(|f| *f as i32).collect::<Vec<i32>>())
                         .bind(&heart_rate_result.time_in_zone_effective.iter().map(|f| *f as i32).collect::<Vec<i32>>())
-                        .execute(&pool)
-                        .await
-                        .map_err(|err| {
-                            eprintln!("Database error: {}", err);
-                            http::StatusCode::INTERNAL_SERVER_ERROR
-                        })?;
+                        .execute(&mut *transaction)
+                        .await;
+
+                    if let Err(err) = query_result {
+                        eprintln!("Database error: {}", err);
+                        continue;
+                    }
 
                 },
                 AnalysisResult::Power(power_result) => {
-                    sqlx::query(
+                    let query_result = sqlx::query(
                         r#"
                         INSERT INTO power_data (workout_id, average, weighted_average, normalized, time_in_zone, time_in_zone_effective)
                         VALUES ($1, $2, $3, $4, $5, $6)
@@ -114,14 +119,20 @@ pub async fn create_records(
                         .bind(&(power_result.normalized as i32))
                         .bind(&power_result.time_in_zone)
                         .bind(&power_result.time_in_zone_effective)
-                        .execute(&pool)
-                        .await
-                        .map_err(|err| {
-                            eprintln!("Database error: {}", err);
-                            http::StatusCode::INTERNAL_SERVER_ERROR
-                        })?;
+                        .execute(&mut *transaction)
+                        .await;
+
+                    if let Err(err) = query_result {
+                        eprintln!("Database error: {}", err);
+                        continue;
+                    }
                 },
             }
+
+            transaction.commit().await.map_err(|err| {
+                eprintln!("Database error: {}", err);
+                http::StatusCode::INTERNAL_SERVER_ERROR
+            })?;
         }
     }
 
