@@ -69,6 +69,8 @@ impl FitFileProcessingCommand for FitFileProcessor {
                 async move {
                     let data = parser.parse_fit_file(&file).unwrap();
                     let mut results: Vec<PartialResult> = Vec::new();
+                    let sha1 = sha1::calculate_sha1(&file).unwrap();
+                    results.push(GeneralResult::Overview(sha1));
                     if parser.check_sport_in_data(&data,
                          &[Sport::Cycling, Sport::Rowing, Sport::Running, Sport::Training]) {
                         for dataslice in data {

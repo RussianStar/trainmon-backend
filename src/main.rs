@@ -6,9 +6,13 @@ mod application;
 use axum::routing::{post, get,Router};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
-use adapters::database_adapter::{analyze, create_records,full};
+use adapters::database_adapter::{analyze, create_records,full,htmx};
+use adapters::oura_adapter::*;
 use uuid::Uuid;
-use adapters::askama::{index,update};
+
+use domain::model::http::http_analysis_request::import_form;
+
+use adapters::askama::index;
 
 #[tokio::main]
 async fn main() {
@@ -28,11 +32,14 @@ async fn main() {
         .unwrap();
 
     let app = Router::new()
+        .route("/test/form", get(import_form))
+        .route("/test/htmx", post(htmx))
         .route("/analyze", post(analyze))
         .route("/analyze/create", post(create_records))
         .route("/analyze/full", post(full))
         .route("/", get(index))
-        .route("/update", get(update))
+        .route("/oura/upload", get(import_oura))
+        .route("/oura/upload", post(upload))
         .with_state(pool);
 
     axum::Server::bind(&addr.parse().unwrap())

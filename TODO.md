@@ -18,6 +18,7 @@ Ziel :
 [] vo2 estimate
 [] Fehler für alle fehlerbehafteten größen
 [] endpoints für daten einlesen : oura/metriken
+    - speziell für alle TrainingPeaks metriken :
 [] endpoint für neue Daten sind da
 [] python service der neue Daten via tp lädt
 

@@ -3,6 +3,7 @@ use chrono::NaiveDate;
 use serde::{Deserializer, Serializer, Deserialize, Serialize};
 
 
+#[derive(Debug)]
 pub struct DateBytes {
     pub date: NaiveDate,
     pub data: Vec<u8>
