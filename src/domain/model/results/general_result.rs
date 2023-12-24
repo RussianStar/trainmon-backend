@@ -5,12 +5,17 @@ use serde::Deserialize;
 
 #[derive(Serialize, Deserialize)]
 pub struct GeneralResult{
-    pub results: Vec<AnalysisResult>
+    pub results: Vec<AnalysisResult>,
+    pub workout_id: String
 }
 
+
 impl GeneralResult {
+    pub fn new(workout_hash: String) -> Self {
+        Self { results: vec![] , workout_id: workout_hash}
+    }
     pub fn new(results: Vec<AnalysisResult>) -> Self {
-        Self { results }
+        Self { results , workout_id: ''}
     }
 }
 

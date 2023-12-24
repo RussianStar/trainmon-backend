@@ -13,10 +13,3 @@ pub async fn index() -> Html<String> {
     };
     Html(template.render().unwrap())
 }
-
-pub async fn update() -> Html<String> {
-    let template = IndexTemplate {
-        message: "Updated!".into(),
-    };
-    Html(template.render().unwrap())
-}

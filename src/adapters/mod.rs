@@ -6,3 +6,4 @@ pub mod askama;
 
 pub mod web_adapter;
 pub mod database_adapter;
+pub mod oura_adapter;

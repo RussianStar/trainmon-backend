@@ -16,6 +16,7 @@ use crate::domain::model::http::http_analysis_result::HttpAnalysisResult;
 use crate::domain::model::http::http_analysis_save_request::HttpAnalysisSaveRequest;
 use crate::domain::model::results::analysis_result::AnalysisResult;
 use crate::domain::model::http::file_provider_option::FileProviderOption;
+use crate::domain::model::http::file_provider_option::FolderOption;
 
 async fn analyze_paths(file_options: FileProviderOption, modes: Vec<String>, hr_zones: Vec<u8>, pwr_zones: Vec<u16>) -> Vec<GeneralResult> {
     let file_options_clone = file_options.clone();
@@ -42,8 +43,9 @@ pub async fn analyze(
     axum::Json(payload): axum::Json<HttpAnalysisRequest>,
 ) -> Result<(http::StatusCode, axum::Json<HttpAnalysisResult>), http::StatusCode> {
 
-        let file_options = payload.file_provider_option.clone();
-        let modes = payload.modes.clone();
+        let provider_option = FileProviderOption::Folder(FolderOption {path: payload.path});
+        let file_options = provider_option.clone();
+        let modes: Vec<String> = payload.modes.iter().map(|s| s.to_string()).collect();
         let hr_zones: Vec<u8> = vec![0,120,145,160,170,185,255];
         let pwr_zones: Vec<u16> = vec![0,120,165,210,250,300,350,3000];
 
@@ -60,8 +62,10 @@ pub async fn full(
     extract::State(pool): extract::State<PgPool>,
 axum::Json(payload): axum::Json<HttpAnalysisRequest>
 ) -> Result<(http::StatusCode, axum::Json<i32>), http::StatusCode> {
-    let file_options = payload.file_provider_option.clone();
-    let modes = payload.modes.clone();
+    println!("{:?}", payload);
+    let provider_option = FileProviderOption::Folder(FolderOption {path: payload.path});
+    let file_options = provider_option.clone();
+    let modes: Vec<String> = payload.modes.iter().map(|s| s.to_string()).collect();
     let hr_zones: Vec<u8> = vec![0,120,145,160,170,185,255];
     let pwr_zones: Vec<u16> = vec![0,120,165,210,250,300,350,3000];
 
@@ -79,6 +83,14 @@ axum::Json(payload): axum::Json<HttpAnalysisRequest>
 
     Ok((http::StatusCode::OK, axum::Json(counter)))
 
+}
+
+use axum::extract::Form;
+use axum::response::Html;
+
+pub async fn htmx(Form(form_data): Form<HttpAnalysisRequest>) -> Html<String> {
+    println!("{:?}", form_data);
+    Html(String::from("Dummy return"))
 }
 
 async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) -> Result<(),anyhow::Error> {
