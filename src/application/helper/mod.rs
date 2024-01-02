@@ -1,2 +1,2 @@
 pub mod uuid;
-pub mod sha1;
+pub mod hash;

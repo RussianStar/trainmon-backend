@@ -11,11 +11,8 @@ pub struct GeneralResult{
 
 
 impl GeneralResult {
-    pub fn new(workout_hash: String) -> Self {
-        Self { results: vec![] , workout_id: workout_hash}
-    }
     pub fn new(results: Vec<AnalysisResult>) -> Self {
-        Self { results , workout_id: ''}
+        Self { results , workout_id: "".to_string()}
     }
 }
 
