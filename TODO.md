@@ -31,4 +31,8 @@ Ziel :
 [] plot effizienzmaß vo2 pro TSS
 
 
+### Aktuell 
+
+[] 8.1.24 : Für den Training effekt müssen ein DataFrame erstellt werden
+[] 8.1.24 : Es muss eine Schnittstelle für das feature definiert werden
 

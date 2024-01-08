@@ -39,7 +39,6 @@ async fn main() {
         .route("/analyze/full", post(full))
         .route("/", get(index))
         .route("/oura/upload", get(import_oura))
-        .route("/oura/upload", post(upload))
         .with_state(pool);
 
     axum::Server::bind(&addr.parse().unwrap())

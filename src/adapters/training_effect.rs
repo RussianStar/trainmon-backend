@@ -4,13 +4,14 @@ use linregress::{FormulaRegressionBuilder, RegressionDataBuilder};
 use polars::frame::DataFrame;
 use polars::prelude::*;
 use polars::prelude::col;
+use polars::prelude::Duration;
 
 #[derive(Debug)]
 struct ProgressAnalyzer {
 }
 
 impl TrainingEffect for ProgressAnalyzer {
-    fn calculate_effect(performance_indicator: String, load_indicator: String, form_indicator: String) -> Result<DataFrame, anyhow::Error>{
+    fn calculate_effect(performance_indicator: &String, load_indicator: &String, form_indicator: &String) -> Result<DataFrame, anyhow::Error>{
 
         // Number of days to average over for the performance metric.
         let rolling = "PERF_ROLLING";
@@ -27,11 +28,11 @@ impl TrainingEffect for ProgressAnalyzer {
 
         let df = get_data_frame(performance_indicator, load_indicator, performance_indicator)?;
         // This is the accumulated load, usually CTL
-        let load: Vec<f64> = df.column(&load_indicator)?.f64().context("")?.into_no_null_iter().collect();
+        let load: Vec<f64> = df.column(load_indicator)?.f64().context("")?.into_no_null_iter().collect();
         // This is the current form in TSB
-        let form: Vec<f64> = df.column(&form_indicator)?.f64().context("")?.into_no_null_iter().collect();
+        let form: Vec<f64> = df.column(form_indicator)?.f64().context("")?.into_no_null_iter().collect();
         // Estimate of a hard performance metric like VO2.
-        let performance: Vec<f64> = df.column(&performance_indicator)?.f64().context("")?.into_no_null_iter().collect();
+        let performance: Vec<f64> = df.column(performance_indicator)?.f64().context("")?.into_no_null_iter().collect();
         
         let data = RegressionDataBuilder::new()
             .build_from(vec![("X",load), ("Y", performance)])
@@ -41,10 +42,10 @@ impl TrainingEffect for ProgressAnalyzer {
             .data(&data)
             .fit()
             .expect("Regression analysis is successful");
-        let intercept: &f64 = regression.parameters().first().context("Could not find the intercept")?;
+        let intercept: f64 = regression.parameters().first().context("Could not find the intercept")?.clone();
 
         let df= df.lazy()
-            .with_column(col(&performance_indicator).rolling_mean(average_range as u32).alias(rolling))
+            .with_column(col(&performance_indicator).rolling_mean(create_rolling_options()).alias(rolling))
             .collect()?;
 
         let df_with_k1 = df.lazy()
@@ -60,6 +61,19 @@ impl TrainingEffect for ProgressAnalyzer {
 
 }
 
-fn get_data_frame(performance_label: String, load_label: String, form_label: String) -> Result<DataFrame> {
+fn create_rolling_options() -> RollingOptions {
+    RollingOptions {
+        window_size: Duration::parse("40d"),  // Example: 60 seconds window
+        min_periods: 1,                        // Minimum periods
+        weights: Some(vec![1.0, 2.0, 3.0]),   // Optional weights
+        center: false,                         // Window not centered
+        by: None,                              // Optional 'by' field
+        closed_window: None,                   // Optional closed_window
+        fn_params: None,                       // Optional function parameters
+        warn_if_unsorted: true,                // Warn if unsorted
+    }
+}
+
+fn get_data_frame(performance_label: &String, load_label: &String, form_label: &String) -> Result<DataFrame> {
     todo!()
 }
