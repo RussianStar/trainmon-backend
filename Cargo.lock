@@ -2526,6 +2526,7 @@ dependencies = [
  "base64 0.13.1",
  "chrono",
  "csv-async",
+ "either",
  "fitparser",
  "futures",
  "futures-util",

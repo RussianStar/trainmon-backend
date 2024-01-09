@@ -1,3 +1,5 @@
+use axum::extract::Form;
+use axum::response::Html;
 use axum::{extract, http};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -25,8 +27,8 @@ async fn analyze_paths(file_options: FileProviderOption, modes: Vec<String>, hr_
     let analyis = async move {
         let profile: UserModel  = UserModel{
             name: String::from("test"), 
-            hr_zones: hr_zones,
-            pwr_zones: pwr_zones
+            hr_zones,
+            pwr_zones
         };  
 
         let parser = FitParserAdapter::new().into();
@@ -85,8 +87,6 @@ axum::Json(payload): axum::Json<HttpAnalysisRequest>
 
 }
 
-use axum::extract::Form;
-use axum::response::Html;
 
 pub async fn htmx(Form(form_data): Form<HttpAnalysisRequest>) -> Html<String> {
     println!("{:?}", form_data);

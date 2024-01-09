@@ -7,3 +7,4 @@ pub mod database;
 pub mod data_access_port;
 pub mod data_management_port;
 pub mod training_effect;
+pub mod database_retrieval;

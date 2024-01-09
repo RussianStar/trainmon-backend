@@ -77,3 +77,7 @@ fn create_rolling_options() -> RollingOptions {
 fn get_data_frame(performance_label: &String, load_label: &String, form_label: &String) -> Result<DataFrame> {
     todo!()
 }
+
+fn get_data_from_table(name: &String, table_name: &String) {
+
+}
