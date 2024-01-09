@@ -1,0 +1,9 @@
+<form hx-post="/tp/upload" hx-encoding="multipart/form-data" method="post" enctype="multipart/form-data">
+    <div id="message-placeholder">
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </div>
+    <input type="file" name="file" accept=".csv">
+    <button type="submit">Upload</button>
+</form>

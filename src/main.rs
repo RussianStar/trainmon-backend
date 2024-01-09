@@ -7,7 +7,8 @@ use axum::routing::{post, get,Router};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use adapters::database_adapter::{analyze, create_records,full,htmx};
-use adapters::oura_adapter::*;
+use adapters::oura_adapter::{oura_csv_upload,import_oura};
+use adapters::tp_import_adapter::{ import_tp_metrics ,tp_metrics_upload};
 use uuid::Uuid;
 
 use domain::model::http::http_analysis_request::import_form;
@@ -38,7 +39,10 @@ async fn main() {
         .route("/analyze/create", post(create_records))
         .route("/analyze/full", post(full))
         .route("/", get(index))
+        .route("/tp/upload", get(import_tp_metrics))
+        .route("/tp/upload", post(tp_metrics_upload))
         .route("/oura/upload", get(import_oura))
+        .route("/oura/upload", post(oura_csv_upload))
         .with_state(pool);
 
     axum::Server::bind(&addr.parse().unwrap())

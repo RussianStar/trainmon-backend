@@ -11,7 +11,7 @@ struct ProgressAnalyzer {
 }
 
 impl TrainingEffect for ProgressAnalyzer {
-    fn calculate_effect(performance_indicator: &String, load_indicator: &String, form_indicator: &String) -> Result<DataFrame, anyhow::Error>{
+    fn calculate_effect(performance_indicator: &str, load_indicator: &str, form_indicator: &str) -> Result<DataFrame, anyhow::Error>{
 
         // Number of days to average over for the performance metric.
         let rolling = "PERF_ROLLING";
@@ -45,7 +45,7 @@ impl TrainingEffect for ProgressAnalyzer {
         let intercept: f64 = regression.parameters().first().context("Could not find the intercept")?.clone();
 
         let df= df.lazy()
-            .with_column(col(&performance_indicator).rolling_mean(create_rolling_options()).alias(rolling))
+            .with_column(col(&performance_indicator).rolling_mean(create_rolling_options(average_range)).alias(rolling))
             .collect()?;
 
         let df_with_k1 = df.lazy()
@@ -61,9 +61,9 @@ impl TrainingEffect for ProgressAnalyzer {
 
 }
 
-fn create_rolling_options() -> RollingOptions {
+fn create_rolling_options(range: i32) -> RollingOptions {
     RollingOptions {
-        window_size: Duration::parse("40d"),  // Example: 60 seconds window
+        window_size: Duration::parse(format!("{range}d").as_str()),
         min_periods: 1,                        // Minimum periods
         weights: Some(vec![1.0, 2.0, 3.0]),   // Optional weights
         center: false,                         // Window not centered
@@ -74,10 +74,10 @@ fn create_rolling_options() -> RollingOptions {
     }
 }
 
-fn get_data_frame(performance_label: &String, load_label: &String, form_label: &String) -> Result<DataFrame> {
+fn get_data_frame(performance_label: &str, load_label: &str, form_label: &str) -> Result<DataFrame> {
     todo!()
 }
 
-fn get_data_from_table(name: &String, table_name: &String) {
+fn get_data_from_table(name: &str, table_name: &str) {
 
 }
