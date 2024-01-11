@@ -1,10 +1,12 @@
+use uuid::Uuid;
+use sqlx::PgPool;
 use crate::application::helper::data_frame::create_dataframe_from_csv;
 use axum::{
     extract::Multipart,
     response::Html
 };
 
-
+use crate::application::helper::uuid::create_uuid;
 use serde::Deserialize;
 use serde::Serialize;
 use askama::Template;
@@ -12,7 +14,7 @@ use askama::Template;
 use crate::ports::tp_import::TrainingPeaksImport;
 
 use anyhow::Ok;
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 
 use polars::prelude::*;
 
@@ -77,6 +79,50 @@ pub async fn tp_metrics_upload(mut multipart: Multipart) -> Html<String> {
     Html(template.render().unwrap())
 }
 
+#[derive(Serialize,Debug)]
+struct TpMetric {
+    pub weight: f32,
+    pub timestamp: f32,
+    pub sleep_duration: f32,
+    pub resting_heart_rate: i32,
+    pub hrv: f32
+}
+
+async fn save_result_to_db(pool: &PgPool,result: Vec<TpMetric> ,user_id: &Uuid) -> Result<(),anyhow::Error> {
+
+    let mut transaction = pool.begin().await.map_err(|err| {
+        eprintln!("Database error: {}", err);
+        anyhow::Error::new(err)
+    })?;
+    let unique_id = create_uuid(&result);
+    for metric_entry in result {
+        let _query_result = sqlx::query(
+            r#"
+            INSERT INTO tp_metrics (id,timestamp, user_id, weight, sleep_duration, resting_heart_rate, hrv)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (id) DO NOTHING
+            "#)
+            .bind(&unique_id)
+            .bind(&metric_entry.timestamp)
+            .bind(&user_id)
+            .bind(&metric_entry.weight)
+            .bind(&metric_entry.sleep_duration)
+            .bind(&metric_entry.resting_heart_rate)
+            .bind(&metric_entry.hrv)
+            .execute(&mut *transaction)
+            .await
+            .map_err(|err| {
+                eprintln!("Database error: {}", err);
+                anyhow::Error::new(err)
+            })?;
+    }
+    let _ = transaction.commit().await.map_err(|err| {
+        eprintln!("Database error: {}", err);
+        anyhow::Error::new(err)
+    })?;
+
+    anyhow::Result::Ok(())
+}
 
 #[cfg(test)]
 mod tests {
