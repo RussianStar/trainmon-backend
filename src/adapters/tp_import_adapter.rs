@@ -80,7 +80,7 @@ pub async fn tp_metrics_upload(mut multipart: Multipart) -> Html<String> {
 }
 
 #[derive(Serialize,Debug)]
-struct TpMetric {
+struct HealthMetric {
     pub weight: f32,
     pub timestamp: f32,
     pub sleep_duration: f32,
@@ -88,7 +88,7 @@ struct TpMetric {
     pub hrv: f32
 }
 
-async fn save_result_to_db(pool: &PgPool,result: Vec<TpMetric> ,user_id: &Uuid) -> Result<(),anyhow::Error> {
+async fn save_result_to_db(pool: &PgPool,result: Vec<HealthMetric> ,user_id: &Uuid) -> Result<(),anyhow::Error> {
 
     let mut transaction = pool.begin().await.map_err(|err| {
         eprintln!("Database error: {}", err);
@@ -98,12 +98,13 @@ async fn save_result_to_db(pool: &PgPool,result: Vec<TpMetric> ,user_id: &Uuid) 
     for metric_entry in result {
         let _query_result = sqlx::query(
             r#"
-            INSERT INTO tp_metrics (id,timestamp, user_id, weight, sleep_duration, resting_heart_rate, hrv)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO tp_metrics (id,time, provider, user_id, weight, sleep_duration, resting_heart_rate, hrv)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT (id) DO NOTHING
             "#)
             .bind(&unique_id)
             .bind(&metric_entry.timestamp)
+            .bind("tp")
             .bind(&user_id)
             .bind(&metric_entry.weight)
             .bind(&metric_entry.sleep_duration)

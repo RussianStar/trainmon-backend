@@ -24,7 +24,19 @@ CREATE TABLE power_data (
     average NUMERIC NOT NULL,
     weighted_average NUMERIC NOT NULL,
     normalized NUMERIC NOT NULL,
-    time_in_zone NUMERIC[] NOT NULL
+    time_in_zone NUMERIC[] NOT NULL,
     time_in_zone_effective NUMERIC[] NOT NULL
 );
+
+CREATE TABLE metrics (
+    metric_id UUID ,
+    user_id UUID REFERENCES workouts(id) ON DELETE CASCADE,
+    provider VARCHAR NOT NULL,
+    time TIMESTAMP NOT NULL,
+    weight NUMERIC NOT NULL,
+    sleep_duration NUMERIC NOT NULL,
+    resting_heart_rate NUMERIC NOT NULL,
+    hrv NUMERIC NOT NULL
+);
+
 
