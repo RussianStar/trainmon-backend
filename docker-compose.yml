@@ -1,8 +1,9 @@
 version: '3.8'
 services:
   db:
+    container_name: ${DB_CONTAINER}
     ports:
-      - 5432:5432
+      - ${DB_PORT}:5432
     image: postgres:13
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -11,5 +12,12 @@ services:
     volumes:
       - ./migrations/20231117120136_Initial_setup.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data/
+  backend:
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    build: .
+    environment:
+      PORT: ${BACKEND_PORT}
+      DATABASE_URL: "postgres://${DB_USER}:${DB_PASSWORD}@${DB_CONTAINER}:5432/{DB_NAME}"
 volumes:
   postgres_data:

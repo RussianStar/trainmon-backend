@@ -44,10 +44,8 @@ async fn main() {
         .route("/oura/upload", get(import_oura))
         .route("/oura/upload", post(oura_csv_upload))
         .with_state(pool);
-
-    axum::Server::bind(&addr.parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 
 }

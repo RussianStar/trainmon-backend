@@ -1,0 +1,7 @@
+*.ps
+tp_all_fit
+*.vscode
+/target
+**/*.md
+.git
+tests/

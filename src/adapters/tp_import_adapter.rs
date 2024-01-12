@@ -17,6 +17,7 @@ use anyhow::Ok;
 use anyhow::Result;
 
 use polars::prelude::*;
+use polars::lazy::prelude::*;
 
 #[derive(Template)]
 #[template(path = "oura_upload.html")]
@@ -46,8 +47,18 @@ impl TrainingPeaksImport for DataImport {
             result = result.join(&metric_df, ["Timestamp"], ["Timestamp"], JoinArgs::new(JoinType::Outer { coalesce: true }))?;
         }
 
-        println!("{:?}",result);
-        return Ok(result);
+        let laz = result.clone()
+            .lazy()
+            .select([
+                col("timestamp")
+                    .cast(DataType::Date)
+            ]
+            )
+                .collect()?;
+
+
+        println!("{:?}", laz);
+        return Ok(laz);
     }
 }
 
