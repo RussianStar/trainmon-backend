@@ -1,11 +1,13 @@
 use axum::extract::Form;
 use axum::response::Html;
 use axum::{extract, http};
+use serde::{Serialize, Deserialize};
 use sqlx::PgPool;
 use uuid::Uuid;
+use askama::Template;
+use crate::domain::model::partial::workout_summary::WorkoutResponse;
 
 use crate::application::helper::uuid::create_uuid;
-
 use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
 use crate::adapters::fit_parser_adapter::FitParserAdapter;
@@ -174,6 +176,48 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
     anyhow::Result::Ok(())
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GetWorkoutsRequest {
+    pub user_id: Uuid
+}
+
+
+#[derive(Deserialize, Debug)]
+pub struct RegisterData {
+    user_name: String,
+    count: usize
+}
+
+pub async fn get_workouts(extract::State(pool): extract::State<PgPool>, form: axum::extract::Form<RegisterData>
+) -> Html<String>{
+    println!("Starting ...");
+    println!("{}",form.count);
+    let user_id =Uuid::new_v5(&Uuid::NAMESPACE_DNS, form.user_name.as_bytes());
+    let workouts = sqlx::query_as!(
+        WorkoutResponse,
+        r#"
+            SELECT start_time as start, end_time as end, duration, sport, distance, tss 
+            from workouts
+            where user_id = $1
+            ORDER BY start_time DESC
+        "#,
+        user_id
+    )
+    .fetch_all(&pool)
+    .await
+    .unwrap();
+
+    println!("Trimming  : {}", workouts.len());
+    let trimmed: Vec<WorkoutResponse> = workouts.into_iter().take(form.count)
+        .collect();
+    println!("{:?}", trimmed);
+    println!("Iterating.. {}", trimmed.len());
+    let rendered: Vec<String> = trimmed.iter()
+        .map(|workout| workout.render().unwrap())
+        .collect();
+
+    Html( rendered.join("\n"))
+}
 pub async fn create_records(
     extract::State(pool): extract::State<PgPool>,
     axum::Json(payload): axum::Json<HttpAnalysisSaveRequest>,

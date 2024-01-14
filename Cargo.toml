@@ -18,10 +18,10 @@ sha2 = "0.9"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = "0.1.14"
 varpro = "0.7.1"
-axum = { version= "0.7.3", features = ["multipart"]}
+axum = { version= "0.7.4", features = ["multipart", "macros"]}
 serde = { version = "1.0.192", features = ["derive"] }
 serde_json = "1.0"
-sqlx = { version = "0.7.2", features = ["uuid", "chrono", "runtime-tokio", "postgres", "tls-rustls"] }
+sqlx = { version = "0.7.2", features = ["uuid", "chrono", "runtime-tokio", "postgres", "tls-rustls", "bigdecimal"] }
 uuid = { version = "1.4", features = ["v4","v5", "serde"] }
 chrono = { version = "0.4.31", features = ["serde"] }
 async-trait = "0.1.74"

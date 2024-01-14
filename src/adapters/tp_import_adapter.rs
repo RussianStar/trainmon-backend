@@ -17,7 +17,6 @@ use anyhow::Ok;
 use anyhow::Result;
 
 use polars::prelude::*;
-use polars::lazy::prelude::*;
 
 #[derive(Template)]
 #[template(path = "oura_upload.html")]
