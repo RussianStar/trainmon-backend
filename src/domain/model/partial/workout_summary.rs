@@ -2,6 +2,8 @@ use std::fmt::Display;
 use std::ops::Div;
 use std::str::FromStr;
 
+use chrono::DateTime;
+use chrono::NaiveTime;
 use chrono::TimeZone;
 use chrono::Utc;
 use askama::Template;
@@ -10,8 +12,6 @@ use serde::Serialize;
 use sqlx::postgres::types::PgInterval;
 use sqlx::types::BigDecimal;
 
-#[derive(Template)]
-#[template(path = "workout.html")]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WorkoutSummary {
     pub start: chrono::DateTime<Utc>,
@@ -36,77 +36,64 @@ impl WorkoutSummary {
         }
     }
 }
-
-
-#[derive(Debug)]
-pub struct FitPgInterval(PgInterval);
-impl Display for FitPgInterval {
+impl Display for WorkoutSummary {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let total_seconds = self.0.microseconds / 1_000_000;
-        let hours = total_seconds / 3600;
-        let minutes = (total_seconds % 3600) / 60;
-        write!(f, "{:02}:{:02}", hours, minutes)
+        todo!()
     }
 }
 
-impl From<PgInterval> for FitPgInterval {
-    fn from(value: PgInterval) -> Self {
-        Self(value)
+impl From<WorkoutSummary> for WorkoutDb {
+    fn from(value: WorkoutSummary) -> Self {
+        todo!()
     }
 }
 
-impl Serialize for FitPgInterval {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer {
-        serializer.serialize_i64(self.0.microseconds)
+impl From<&WorkoutSummary> for &WorkoutDb {
+    fn from(value: &WorkoutSummary) -> Self {
+        todo!()
     }
 }
-impl<'de> Deserialize<'de> for FitPgInterval {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de> {
-        let s = String::deserialize(deserializer)?;
-        Ok(FitPgInterval(PgInterval {microseconds: i64::from_str_radix(&s, 10).unwrap()
-            , months: 0, days:0}))
-    }
+pub struct WorkoutDb {
+    pub start: chrono::NaiveDateTime,
+    pub end: chrono::NaiveDateTime,
+    pub duration: PgInterval,
+    pub sport: std::string::String,
+    pub distance: BigDecimal,
+    pub tss: BigDecimal,
 }
-#[derive(Debug)]
-pub struct FitBigDecimal(BigDecimal);
-impl Display for FitBigDecimal {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        return write!(f, "{:03}", self.0.to_string());
-    }
-}
-impl From<BigDecimal> for FitBigDecimal {
-    fn from(value: BigDecimal) -> Self {
-        Self(value)
-    }
-}
-impl<'de> Deserialize<'de> for FitBigDecimal {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de> {
-        let s = String::deserialize(deserializer)?;
-        Ok(FitBigDecimal(BigDecimal::from_str(&s).unwrap()))
-    }
-}
-impl Serialize for FitBigDecimal {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer {
-        serializer.serialize_str(&self.0.to_string())
-    }
-}
+
+
 
 #[derive(Template)]
 #[template(path = "workout.html")]
 #[derive(Debug, Serialize, Deserialize)]
-pub struct WorkoutResponse {
+pub struct WorkoutHtml {
     pub start: chrono::NaiveDateTime,
     pub end: chrono::NaiveDateTime,
-    pub duration: FitPgInterval,
-    pub sport: std::string::String,
-    pub distance: FitBigDecimal,
-    pub tss: FitBigDecimal,
+    pub duration: chrono::NaiveTime,
+    pub sport:  String,
+    pub distance: usize,
+    pub tss: usize,
+}
+
+impl Into<WorkoutHtml> for WorkoutDb {
+    fn into(self) -> WorkoutHtml {
+        WorkoutHtml {
+        start: self.start,
+            end: self.end,
+            duration: NaiveTime::from_hms_micro_opt(0, 0, 0, self.duration.microseconds as u32).unwrap(),
+            sport: match self.sport { 
+                    "cycling::gravel_cycling" => "Gravel".to_string(),
+                    "cycling::mountain" => "Gravel".to_string(),
+                    "cycling::road" => "Rennrad".to_string(),
+                    "cycling::generic" => "Rennrad".to_string(),
+                    "training::strength_training" => "Kraft".to_string(),
+                    "training::cardio_training" => "Fußball".to_string(),
+                    "running::generic" => "Laufen".to_string(),
+                    _ => sport.to_string(),
+                    },
+            distance: self.distance as usize,
+            tss: usize::try_from(self.tss).ok()
+            };
+    }
 }

@@ -5,7 +5,7 @@ use serde::{Serialize, Deserialize};
 use sqlx::PgPool;
 use uuid::Uuid;
 use askama::Template;
-use crate::domain::model::partial::workout_summary::WorkoutResponse;
+use crate::domain::model::partial::workout_summary::{WorkoutDb, WorkoutHtml};
 
 use crate::application::helper::uuid::create_uuid;
 use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
@@ -105,6 +105,7 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
     for analysis_result in &result.results {
         match analysis_result {
             AnalysisResult::Overview(workout_summary) => {
+                let db_item: &WorkoutDb = workout_summary.into();
                 let _query_result = sqlx::query(
                     r#"
                     INSERT INTO workouts (id, user_id, start_time, end_time, duration, sport, distance, tss)
@@ -113,12 +114,12 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
                     "#)
                     .bind(&unique_id)
                     .bind(&user_id)
-                    .bind(&workout_summary.start)
-                    .bind(&workout_summary.end)
-                    .bind(&sqlx::postgres::types::PgInterval { months: 0, days: 0, microseconds: workout_summary.duration as i64 * 1_000_000 })
-                    .bind(&workout_summary.sport)
-                    .bind(&(workout_summary.distance as f64))
-                    .bind(&(workout_summary.tss as f64))
+                    .bind(&db_item.start)
+                    .bind(&db_item.end)
+                    .bind(&db_item.duration)
+                    .bind(&db_item.sport)
+                    .bind(&db_item.distance)
+                    .bind(&db_item.tss)
                     .execute(&mut *transaction)
                     .await
                     .map_err(|err| {
@@ -189,26 +190,14 @@ pub struct RegisterData {
 }
 
 fn map_sport(sport: &str) -> String {
-    match sport {
-        "cycling::gravel_cycling" => "Gravel".to_string(),
-        "cycling::mountain" => "Gravel".to_string(),
-        "cycling::road" => "Rennrad".to_string(),
-        "cycling::generic" => "Rennrad".to_string(),
-        "training::strength_training" => "Kraft".to_string(),
-        "training::cardio_training" => "Fußball".to_string(),
-        "running::generic" => "Laufen".to_string(),
-        _ => sport.to_string(), // Default case
-    }
 }
 
 
 pub async fn get_workouts(extract::State(pool): extract::State<PgPool>, form: axum::extract::Form<RegisterData>
 ) -> Html<String>{
-    println!("Starting ...");
-    println!("{}",form.count);
     let user_id =Uuid::new_v5(&Uuid::NAMESPACE_DNS, form.user_name.as_bytes());
     let workouts = sqlx::query_as!(
-        WorkoutResponse,
+        WorkoutDb,
         r#"
             SELECT start_time as start, end_time as end, duration, sport, distance, tss 
             from workouts
@@ -221,15 +210,12 @@ pub async fn get_workouts(extract::State(pool): extract::State<PgPool>, form: ax
     .await
     .unwrap();
 
-    println!("Trimming  : {}", workouts.len());
-    let trimmed: Vec<WorkoutResponse> = workouts.into_iter().take(form.count)
+    let trimmed: Vec<WorkoutHtml> = workouts.into_iter().take(form.count)
             .map(|mut workout| {
         workout.sport = map_sport(&workout.sport);
-        workout
+        workout.into()
     })
         .collect();
-    println!("{:?}", trimmed);
-    println!("Iterating.. {}", trimmed.len());
     let rendered: Vec<String> = trimmed.iter()
         .map(|workout| workout.render().unwrap())
         .collect();
