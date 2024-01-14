@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use std::ops::Div;
 use std::str::FromStr;
 
 use chrono::TimeZone;
@@ -41,7 +42,10 @@ impl WorkoutSummary {
 pub struct FitPgInterval(PgInterval);
 impl Display for FitPgInterval {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        return write!(f, "{}", self.0.microseconds);
+        let total_seconds = self.0.microseconds / 1_000_000;
+        let hours = total_seconds / 3600;
+        let minutes = (total_seconds % 3600) / 60;
+        write!(f, "{:02}:{:02}", hours, minutes)
     }
 }
 
@@ -71,7 +75,7 @@ impl<'de> Deserialize<'de> for FitPgInterval {
 pub struct FitBigDecimal(BigDecimal);
 impl Display for FitBigDecimal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        return write!(f, "{:.3}", self.0.to_string());
+        return write!(f, "{:03}", self.0.to_string());
     }
 }
 impl From<BigDecimal> for FitBigDecimal {

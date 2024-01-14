@@ -15,9 +15,11 @@
             align-items: center;
             height: 100vh;
         }
-        .container {
+                .container {
             width: 80%;
             max-width: 1000px;
+            max-height: 1000px; /* Adjust this value as needed */
+            overflow-y: auto; /* Enables vertical scrolling */
             background-color: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -57,11 +59,15 @@
     </style>
     </head>
 <body>
-    <div class="container">
 <form name="input">
     <input type="text" id="count" name="count" placeholder="4" value="40">
     <input type="text" id="user_id" name="user_name" placeholder="tilman" value="tilman">
+    <button class='btn' hx-post="/workouts"
+                        hx-include="[name='user_name'], [name='count']"
+                        hx-target="#workout_data"
+                        hx-swap="innerHTML">Get workouts</button>
 </form>
+    <div class="container">
 <table id="workouts-table">
     <thead>
         <tr>
@@ -73,17 +79,24 @@
              <th>TSS</th>   
         </tr>
     </thead>
-    <tbody>
-        <tr id="replaceMe">
-  <td colspan="3">
-    <button class='btn' hx-post="/workouts"
-                        hx-include="[name='user_name'], [name='count']"
-                        hx-target="#replaceMe"
-                        hx-swap="outerHTML">Get workouts</button>
-  </td>
-</tr>
+    <tbody id="workout_data">
     </tbody>
 </table>
 </container>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const cells = document.querySelectorAll('.color-coded');
+
+        cells.forEach(cell => {
+            const value = cell.textContent.trim(); // or any other logic to determine the value
+
+            if (value === 'Gravel') {
+                cell.style.color = 'green';
+            } else if (value === 'AnotherCondition') {
+                cell.style.color = 'red';
+            } // Add more conditions as needed
+        });
+    });
+</script>
 </body>
 </html>

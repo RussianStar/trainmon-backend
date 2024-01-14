@@ -188,6 +188,20 @@ pub struct RegisterData {
     count: usize
 }
 
+fn map_sport(sport: &str) -> String {
+    match sport {
+        "cycling::gravel_cycling" => "Gravel".to_string(),
+        "cycling::mountain" => "Gravel".to_string(),
+        "cycling::road" => "Rennrad".to_string(),
+        "cycling::generic" => "Rennrad".to_string(),
+        "training::strength_training" => "Kraft".to_string(),
+        "training::cardio_training" => "Fußball".to_string(),
+        "running::generic" => "Laufen".to_string(),
+        _ => sport.to_string(), // Default case
+    }
+}
+
+
 pub async fn get_workouts(extract::State(pool): extract::State<PgPool>, form: axum::extract::Form<RegisterData>
 ) -> Html<String>{
     println!("Starting ...");
@@ -209,6 +223,10 @@ pub async fn get_workouts(extract::State(pool): extract::State<PgPool>, form: ax
 
     println!("Trimming  : {}", workouts.len());
     let trimmed: Vec<WorkoutResponse> = workouts.into_iter().take(form.count)
+            .map(|mut workout| {
+        workout.sport = map_sport(&workout.sport);
+        workout
+    })
         .collect();
     println!("{:?}", trimmed);
     println!("Iterating.. {}", trimmed.len());
