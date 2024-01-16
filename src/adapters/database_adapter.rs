@@ -177,51 +177,6 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
     anyhow::Result::Ok(())
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct GetWorkoutsRequest {
-    pub user_id: Uuid
-}
-
-
-#[derive(Deserialize, Debug)]
-pub struct RegisterData {
-    user_name: String,
-    count: usize
-}
-
-fn map_sport(sport: &str) -> String {
-}
-
-
-pub async fn get_workouts(extract::State(pool): extract::State<PgPool>, form: axum::extract::Form<RegisterData>
-) -> Html<String>{
-    let user_id =Uuid::new_v5(&Uuid::NAMESPACE_DNS, form.user_name.as_bytes());
-    let workouts = sqlx::query_as!(
-        WorkoutDb,
-        r#"
-            SELECT start_time as start, end_time as end, duration, sport, distance, tss 
-            from workouts
-            where user_id = $1
-            ORDER BY start_time DESC
-        "#,
-        user_id
-    )
-    .fetch_all(&pool)
-    .await
-    .unwrap();
-
-    let trimmed: Vec<WorkoutHtml> = workouts.into_iter().take(form.count)
-            .map(|mut workout| {
-        workout.sport = map_sport(&workout.sport);
-        workout.into()
-    })
-        .collect();
-    let rendered: Vec<String> = trimmed.iter()
-        .map(|workout| workout.render().unwrap())
-        .collect();
-
-    Html( rendered.join("\n"))
-}
 pub async fn create_records(
     extract::State(pool): extract::State<PgPool>,
     axum::Json(payload): axum::Json<HttpAnalysisSaveRequest>,
