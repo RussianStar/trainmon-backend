@@ -4,3 +4,5 @@
 tp_all_fit
 .vscode
 /target
+.env
+.sqlx/*

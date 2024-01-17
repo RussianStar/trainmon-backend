@@ -23,7 +23,7 @@ impl Analyzer for WorkoutAnalyzer {
                 _ => None,
             });
             
-            let duration = timeslice.fields().iter().find(|f| f.name() == "total_elapsed_time").and_then(|f| match f.value() {
+            let duration = timeslice.fields().iter().find(|f| f.name() == "total_timer_time").and_then(|f| match f.value() {
                 fitparser::Value::Float64(v) => Some(*v),
                 _ => None,
             });
