@@ -53,5 +53,4 @@ Philosopie ist sowieso, lieber langweilig auf das bekannte setzen und das visual
 
 ### Aktuell 
 
-[] 11.1 : Implementiere allgemeine Funktion die eine Metrik in die Datenbank schreibt. Spezielle Metriken wie tp, oura und andere werden dann via trait und `into` implementiert. 
-FIle :  'tp_import_adapter'
+[] Nutze tatsächliche Zeit und nicht vergangene Zeit als Maß

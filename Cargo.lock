@@ -399,6 +399,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "axum-debug"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9666049d3529b94577485cbbca1c81412a000491aeb8d50b12b03ae652c3290"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "axum-macros"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2620,6 +2631,7 @@ dependencies = [
  "askama",
  "async-trait",
  "axum",
+ "axum-debug",
  "base64 0.13.1",
  "chrono",
  "csv-async",

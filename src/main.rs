@@ -6,7 +6,7 @@ mod application;
 use axum::routing::{post, get,Router};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
-use adapters::workout_handler::{get_workout_summary, get_workouts };
+use adapters::workout_handler::{get_workout_summary,  get_workouts };
 use adapters::database_adapter::{analyze, create_records,full,htmx};
 use adapters::oura_adapter::{oura_csv_upload,import_oura};
 use adapters::tp_import_adapter::{ import_tp_metrics ,tp_metrics_upload};
