@@ -13,6 +13,7 @@ impl Analyzer for WorkoutAnalyzer {
     fn analyze(&self, timeslice: &fitparser::FitDataRecord, _profile: &UserModel) -> Option<PartialResult> {
         // Logic for WorkoutAnalyzer
         if let fitparser::profile::MesgNum::Session = timeslice.kind() {
+            println!("{:?}", timeslice.fields());
             let start_date = timeslice.fields().iter().find(|f| f.name() == "start_time").and_then(|f| match f.value() {
                 fitparser::Value::Timestamp(val) => Some(val.timestamp()),
                 _ => None,

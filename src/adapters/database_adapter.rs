@@ -102,15 +102,15 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
         anyhow::Error::new(err)
     })?;
     let unique_id = create_uuid(&result);
+    println!("{:?}", unique_id);
     for analysis_result in &result.results {
         match analysis_result {
             AnalysisResult::Overview(workout_summary) => {
-                let db_item: &WorkoutDb = workout_summary.into();
+                let db_item: WorkoutDb = workout_summary.into();
                 let _query_result = sqlx::query(
                     r#"
                     INSERT INTO workouts (id, user_id, start_time, end_time, duration, sport, distance, tss)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                    ON CONFLICT (id) DO NOTHING
                     "#)
                     .bind(&unique_id)
                     .bind(&user_id)
@@ -132,7 +132,6 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
                     r#"
                     INSERT INTO heart_rate_data (workout_id, average,  average_effective,time_in_zone, time_in_zone_effective)
                     VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (workout_id) DO NOTHING
                     "#)
                     .bind(&unique_id)
                     .bind(&(heart_rate_result.average as i32))
@@ -152,7 +151,6 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
                     r#"
                     INSERT INTO power_data (workout_id, average, weighted_average, normalized, time_in_zone, time_in_zone_effective)
                     VALUES ($1, $2, $3, $4, $5, $6)
-                    ON CONFLICT (workout_id) DO NOTHING
                     "#)
                     .bind(&unique_id)
                     .bind(&(power_result.average as i32))

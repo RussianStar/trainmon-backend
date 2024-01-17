@@ -53,4 +53,4 @@ Philosopie ist sowieso, lieber langweilig auf das bekannte setzen und das visual
 
 ### Aktuell 
 
-[] Nutze tatsächliche Zeit und nicht vergangene Zeit als Maß
+[] Füge navigation hinzu mit login und globalen username

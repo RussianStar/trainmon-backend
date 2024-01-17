@@ -6,7 +6,6 @@ pub fn process_power_data(results: &[PartialResult], zones: &[u16]) -> Option<Po
             if let PartialResult::PowerData(res_a) = res {
                 Some(res_a)
             } else {
-                //println!("Debug: No PowerData found in results");
                 None
             }
         })

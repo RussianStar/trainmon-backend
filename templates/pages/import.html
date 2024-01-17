@@ -1,0 +1,41 @@
+<h3>Uploads</h3>
+<div>
+    <div>
+        <h4>Tp Metrik Upload</h4>
+        <form hx-post="/tp/upload" hx-encoding="multipart/form-data" method="post" enctype="multipart/form-data">
+            <div id="message-placeholder">
+                {% if message %}
+                    <p>{{ message }}</p>
+                {% endif %}
+            </div>
+            <input type="file" name="file" accept=".csv">
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+    <div>
+        <h4>Oura data import</h4>
+        <form hx-post="/oura/upload" hx-encoding="multipart/form-data" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv">
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+    <div>
+        <h4>Fit file import</h4>
+        <form action="/test/htmx" method="post" >
+            <label for="user_id">User ID:</label><br>
+            <input type="text" id="user_id" name="user_id"><br>
+            <label for="path">File Provider Option:</label><br>
+            <input type="text" id="path" name="path"><br>
+            <label for="hr_zones">HR Zones:</label><br>
+            <input type="text" id="hr_zones" name="hr_zones"><br>
+            <label for="pwr_zones">PWR Zones:</label><br>
+            <input type="text" id="pwr_zones" name="pwr_zones"><br>
+            <input type="submit" value="Submit">
+            <label for="modes">Modes:</label><br>
+            <input type="checkbox" id="mode1" name="modes" value="workout"><label for="mode1">Workout</label><br>
+            <input type="checkbox" id="mode2" name="modes" value="power"><label for="mode2">Power</label><br>
+            <input type="checkbox" id="mode2" name="modes" value="heart_rate"><label for="mode2">Heart Rate</label><br>
+        </form>
+
+    </div>
+</div>

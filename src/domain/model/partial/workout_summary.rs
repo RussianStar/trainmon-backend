@@ -1,7 +1,9 @@
 use askama::Template;
+use chrono::Duration;
 use chrono::NaiveTime;
 use chrono::TimeZone;
 use chrono::Utc;
+use nalgebra::ComplexField;
 use core::f64;
 use serde::Deserialize;
 use serde::Serialize;
@@ -44,12 +46,19 @@ impl From<WorkoutSummary> for WorkoutDb {
         todo!()
     }
 }
-
-impl From<&WorkoutSummary> for &WorkoutDb {
+impl From<&WorkoutSummary> for WorkoutDb {
     fn from(value: &WorkoutSummary) -> Self {
-        todo!()
+        WorkoutDb {
+            start: value.start.naive_utc(),
+            end: value.end.naive_utc(),
+            duration: PgInterval::try_from( Duration::seconds(value.duration as i64)).unwrap(),
+            sport: value.sport.clone(),
+            distance: BigDecimal::from(value.distance.round() as u64),
+            tss: BigDecimal::from(value.tss.round() as u64), 
+        }
     }
 }
+
 #[derive(Debug)]
 pub struct WorkoutDb {
     pub start: chrono::NaiveDateTime,
