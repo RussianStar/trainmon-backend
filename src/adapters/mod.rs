@@ -12,3 +12,4 @@ pub mod database_retriever;
 pub mod tp_import_adapter;
 
 pub mod workout_handler;
+pub mod web;

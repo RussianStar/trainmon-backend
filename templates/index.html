@@ -62,10 +62,20 @@
 <form name="input">
     <input type="text" id="count" name="count" placeholder="4" value="40">
     <input type="text" id="user_id" name="user_name" placeholder="tilman" value="tilman">
+    <input type="text" id="year" name="year" placeholder="2023" value="2023">
+    <input type="text" id="comp_year" name="comp_year" placeholder="2024" value="2024">
     <button class='btn' hx-post="/workouts"
                         hx-include="[name='user_name'], [name='count']"
                         hx-target="#workout_data"
                         hx-swap="innerHTML">Get workouts</button>
+    <button class='btn' hx-post="/summary"
+                        hx-include="[name='user_name'], [name='year']"
+                        hx-target="#summary_base"
+                        hx-swap="innerHTML">Basisjahr</button>
+    <button class='btn' hx-post="/summary"
+                        hx-include="[name='user_name'], [name='comp_year']"
+                        hx-target="#summary_comp"
+                        hx-swap="innerHTML">Vergleiche</button>
 </form>
     <div class="container">
 <table id="workouts-table">
@@ -82,21 +92,30 @@
     <tbody id="workout_data">
     </tbody>
 </table>
+<table id="summary-base-table">
+    <thead>
+        <tr>
+             <th>Woche</th>   
+             <th>Dauer</th>   
+             <th>Entfernung</th>   
+             <th>TSS</th>   
+        </tr>
+    </thead>
+    <tbody id="summary_base">
+    </tbody>
+</table>
+<table id="summary-comp-table">
+    <thead>
+        <tr>
+             <th>Woche</th>   
+             <th>Dauer</th>   
+             <th>Entfernung</th>   
+             <th>TSS</th>   
+        </tr>
+    </thead>
+    <tbody id="summary_comp">
+    </tbody>
+</table>
 </container>
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const cells = document.querySelectorAll('.color-coded');
-
-        cells.forEach(cell => {
-            const value = cell.textContent.trim(); // or any other logic to determine the value
-
-            if (value === 'Gravel') {
-                cell.style.color = 'green';
-            } else if (value === 'AnotherCondition') {
-                cell.style.color = 'red';
-            } // Add more conditions as needed
-        });
-    });
-</script>
 </body>
 </html>

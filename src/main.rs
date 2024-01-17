@@ -6,7 +6,7 @@ mod application;
 use axum::routing::{post, get,Router};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
-use adapters::workout_handler::get_workouts;
+use adapters::workout_handler::{get_workout_summary, get_workouts };
 use adapters::database_adapter::{analyze, create_records,full,htmx};
 use adapters::oura_adapter::{oura_csv_upload,import_oura};
 use adapters::tp_import_adapter::{ import_tp_metrics ,tp_metrics_upload};
@@ -38,6 +38,7 @@ async fn main()  -> Result<(), anyhow::Error>{
         .route("/test/htmx", post(htmx))
         .route("/analyze", post(analyze))
         .route("/workouts", post(get_workouts))
+        .route("/summary", post(get_workout_summary))
         .route("/analyze/create", post(create_records))
         .route("/analyze/full", post(full))
         .route("/", get(index))
