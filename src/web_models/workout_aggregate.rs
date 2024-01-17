@@ -46,6 +46,8 @@ impl Into<WorkoutHtml> for WorkoutDb {
                 "cycling::mountain" => "Gravel".to_string(),
                 "cycling::road" => "Rennrad".to_string(),
                 "cycling::generic" => "Rennrad".to_string(),
+                "cycling::indoor" => "Indoor".to_string(),
+                "cycling::virtual_activity" => "Indoor".to_string(),
                 "training::strength_training" => "Kraft".to_string(),
                 "training::cardio_training" => "Fußball".to_string(),
                 "running::generic" => "Laufen".to_string(),

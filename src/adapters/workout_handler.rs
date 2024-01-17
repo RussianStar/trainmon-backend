@@ -75,10 +75,8 @@ pub async fn get_workout_summary(
     extract::State(pool): extract::State<PgPool>,
     form: axum::extract::Form<WorkoutSummaryRequest>,
 ) -> Html<String> {
-    println!("Starting");
     let user_id = Uuid::new_v5(&Uuid::NAMESPACE_DNS, form.user_name.as_bytes());
     let year = form.aggregation_interval as f64;
-    println!("year is : {}",year);
     let workouts = sqlx::query_as!(
         WorkoutAggregate,
         r#"
