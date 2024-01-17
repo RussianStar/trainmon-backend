@@ -1,11 +1,10 @@
 use uuid::Uuid;
 
-use crate::domain::model::results::general_result::GeneralResult;
+use serde::Serialize;
 
-
-pub fn create_uuid(result: &GeneralResult) -> Uuid {
+pub fn create_uuid<T: Serialize>(item: &T) -> Uuid {
     let namespace = Uuid::NAMESPACE_DNS;
-    let data = serde_json::to_string(&result).expect("Failed to serialize data");
+    let data = serde_json::to_string(&item).expect("Failed to serialize data");
 
     Uuid::new_v5(&namespace, data.as_bytes())
 }

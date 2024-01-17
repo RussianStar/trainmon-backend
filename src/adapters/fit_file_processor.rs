@@ -16,6 +16,7 @@ use crate::ports::fit_file_parser::FitFileParser;
 use crate::ports::analyzer::Analyzer;
 use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
+use crate::application::helper::hash::calculate_sha1;
 use crate::application::analyzer::workout_analyzer::WorkoutAnalyzer;
 use crate::application::analyzer::heart_rate_analyzer::HeartRateAnalyzer;
 use crate::application::analyzer::power_analyzer::PowerAnalyzer;
@@ -24,6 +25,7 @@ use crate::application::heart_rate::hr_service::process_heart_rate_data;
 use crate::application::workout::workout_service::process_workout_summary;
 use crate::application::power::pwr_service::process_power_data;
 
+use crate::domain::model::partial::workout_summary::WorkoutSummary;
 use crate::domain::model::partial::partial_result::PartialResult;
 use crate::domain::model::results::general_result::GeneralResult;
 use crate::domain::core::user_model::UserModel;
@@ -69,8 +71,8 @@ impl FitFileProcessingCommand for FitFileProcessor {
                 async move {
                     let data = parser.parse_fit_file(&file).unwrap();
                     let mut results: Vec<PartialResult> = Vec::new();
-                    let sha1 = sha1::calculate_sha1(&file).unwrap();
-                    results.push(GeneralResult::Overview(sha1));
+                    let sha1 = calculate_sha1(&file).unwrap();
+                    results.push(crate::domain::model::partial::partial_result::PartialResult::WorkoutData(WorkoutSummary::new(sha1)));
                     if parser.check_sport_in_data(&data,
                          &[Sport::Cycling, Sport::Rowing, Sport::Running, Sport::Training]) {
                         for dataslice in data {

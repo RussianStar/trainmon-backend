@@ -1,0 +1,24 @@
+<div>
+    <form name="input">
+        <input type="text" id="year" name="year" placeholder="4" value="40">
+        <input type="text" id="kw" name="kw" placeholder="4" value="40">
+        <input type="text" id="user_id" name="user_name" placeholder="tilman" value="tilman">
+        <button class='btn' hx-post="/workouts"
+                            hx-target="#workout_data"
+                            hx-swap="innerHTML">KW explorer</button>
+    </form>
+    <table id="workouts-table">
+        <thead>
+            <tr>
+                 <th>Start</th>   
+                 <th>End</th>   
+                 <th>Duration</th>   
+                 <th>Sport</th>   
+                 <th>Distance</th>   
+                 <th>TSS</th>   
+            </tr>
+        </thead>
+        <tbody id="workout_data">
+        </tbody>
+    </table>
+</div>

@@ -9,57 +9,6 @@ use sqlx::postgres::types::PgInterval;
 use sqlx::types::BigDecimal;
 use std::fmt::Display;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WorkoutSummary {
-    pub start: chrono::DateTime<Utc>,
-    pub end: chrono::DateTime<Utc>,
-    pub duration: u64,
-    pub sport: std::string::String,
-    pub distance: f64,
-    pub tss: f64,
-    pub file_hash: std::string::String,
-}
-
-impl WorkoutSummary {
-    pub fn new(hash: String) -> Self {
-        Self {
-            start: Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap(),
-            end: Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap(),
-            duration: 0,
-            sport: "".to_string(),
-            distance: 0.0,
-            tss: 0.0,
-            file_hash: hash,
-        }
-    }
-}
-impl Display for WorkoutSummary {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
-    }
-}
-
-impl From<WorkoutSummary> for WorkoutDb {
-    fn from(value: WorkoutSummary) -> Self {
-        todo!()
-    }
-}
-
-impl From<&WorkoutSummary> for &WorkoutDb {
-    fn from(value: &WorkoutSummary) -> Self {
-        todo!()
-    }
-}
-#[derive(Debug)]
-pub struct WorkoutDb {
-    pub start: chrono::NaiveDateTime,
-    pub end: chrono::NaiveDateTime,
-    pub duration: PgInterval,
-    pub sport: std::string::String,
-    pub distance: BigDecimal,
-    pub tss: BigDecimal,
-}
-
 #[derive(Template)]
 #[template(path = "workout.html")]
 #[derive(Debug, Serialize, Deserialize)]

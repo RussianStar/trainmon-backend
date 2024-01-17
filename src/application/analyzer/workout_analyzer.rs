@@ -55,11 +55,13 @@ impl Analyzer for WorkoutAnalyzer {
             
             return Some(PartialResult::WorkoutData(WorkoutSummary { 
                 distance: distance.unwrap_or(0.),
-                tss: tss,
+                tss,
                 start: start_datetime, 
                 end: end_datetime,
                 sport: format!("{}::{}", sport.unwrap_or_else(|| "".to_string()), sub_sport.unwrap_or_else(|| "".to_string())),
-                duration: duration_as_seconds}));
+                duration: duration_as_seconds,
+                file_hash: "".to_string()
+            }));
         }
     None        
     }

@@ -31,4 +31,26 @@ Ziel :
 [] plot effizienzmaß vo2 pro TSS
 
 
+### Gedanken
 
+Wie soll ich die Metriken darstellen ? 
+- Wie TrainingPeaks, also Time, Name, Value
+Vorteile : Einfach zum importieren und ohne eine große Einschränkung. Man macht wenig und daher verbaut man ishc auch wenig.
+Nachteile: Mehr Aufwand bei allen weiteren Funktionen.
+
+- 'Aggregiert' für jeden Tag also für jeden Tag : (Tag, Weight, Hr, HRV, Schlaf und so weiter)
+Vorteile: Alles schon aggregiert, der Tag ist die natürliche Einheit.
+Nachteile: Mehr Aufwand beim input
+
+Conclusio des 11.1 im Jahre des Herrn 2024 :
+"Lieber mehr beim Import machen, ja dann hab ich da meine eigenen Probleme (zb. mögen mache Metriken fehlen, neue Metrik = Codechange), aber dafür ist dann alles schnell. 
+
+Und komm was wird man den revolutionäres finden ?
+Philosopie ist sowieso, lieber langweilig auf das bekannte setzen und das visualisieren. Big Picture vor small picture. Sollte man dann einen neuen tollen Gesundheits/Regenerationswert finden, entweder komplett neu oder nur nicht implementiert aber bekannt, dann muss der eigebaut werden.
+"
+
+
+
+### Aktuell 
+
+[] Nutze tatsächliche Zeit und nicht vergangene Zeit als Maß

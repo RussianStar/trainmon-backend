@@ -1,3 +1,6 @@
+.aws/*
+.aws
+.en
 tp_all_fit
 .vscode
 /target

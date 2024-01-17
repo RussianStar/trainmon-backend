@@ -1,9 +1,13 @@
+use axum::extract::Form;
+use axum::response::Html;
 use axum::{extract, http};
+use serde::{Serialize, Deserialize};
 use sqlx::PgPool;
 use uuid::Uuid;
+use askama::Template;
+use crate::domain::model::partial::workout_summary::{WorkoutDb, WorkoutHtml};
 
 use crate::application::helper::uuid::create_uuid;
-
 use crate::ports::fit_file_processing_command::FitFileProcessingCommand;
 
 use crate::adapters::fit_parser_adapter::FitParserAdapter;
@@ -25,8 +29,8 @@ async fn analyze_paths(file_options: FileProviderOption, modes: Vec<String>, hr_
     let analyis = async move {
         let profile: UserModel  = UserModel{
             name: String::from("test"), 
-            hr_zones: hr_zones,
-            pwr_zones: pwr_zones
+            hr_zones,
+            pwr_zones
         };  
 
         let parser = FitParserAdapter::new().into();
@@ -85,8 +89,6 @@ axum::Json(payload): axum::Json<HttpAnalysisRequest>
 
 }
 
-use axum::extract::Form;
-use axum::response::Html;
 
 pub async fn htmx(Form(form_data): Form<HttpAnalysisRequest>) -> Html<String> {
     println!("{:?}", form_data);
@@ -103,6 +105,7 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
     for analysis_result in &result.results {
         match analysis_result {
             AnalysisResult::Overview(workout_summary) => {
+                let db_item: &WorkoutDb = workout_summary.into();
                 let _query_result = sqlx::query(
                     r#"
                     INSERT INTO workouts (id, user_id, start_time, end_time, duration, sport, distance, tss)
@@ -111,12 +114,12 @@ async fn save_result_to_db(pool: &PgPool,result: GeneralResult ,user_id: &Uuid) 
                     "#)
                     .bind(&unique_id)
                     .bind(&user_id)
-                    .bind(&workout_summary.start)
-                    .bind(&workout_summary.end)
-                    .bind(&sqlx::postgres::types::PgInterval { months: 0, days: 0, microseconds: workout_summary.duration as i64 * 1_000_000 })
-                    .bind(&workout_summary.sport)
-                    .bind(&(workout_summary.distance as f64))
-                    .bind(&(workout_summary.tss as f64))
+                    .bind(&db_item.start)
+                    .bind(&db_item.end)
+                    .bind(&db_item.duration)
+                    .bind(&db_item.sport)
+                    .bind(&db_item.distance)
+                    .bind(&db_item.tss)
                     .execute(&mut *transaction)
                     .await
                     .map_err(|err| {

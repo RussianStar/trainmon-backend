@@ -11,7 +11,7 @@ pub struct DateBytes {
 
 impl DateBytes {
     pub fn new(date: NaiveDate, data: Vec<u8>) -> Self {
-        Self { date: date, data: data }
+        Self { date, data }
     }
 }
 
