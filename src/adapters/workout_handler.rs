@@ -1,5 +1,4 @@
 use crate::domain::model::partial::workout_summary::{WorkoutDb, WorkoutHtml};
-use askama::Template;
 use axum::extract;
 use axum::response::Html;
 use serde::Deserialize;
@@ -43,10 +42,7 @@ pub async fn get_workouts(
     .await
     .unwrap();
 
-    let trimmed: Vec<WorkoutHtml> = workouts
-        .into_iter()
-        .map(|workout| workout.into())
-        .collect();
+    let trimmed: Vec<WorkoutHtml> = workouts.into_iter().map(|workout| workout.into()).collect();
     let rendered: Vec<String> = trimmed
         .iter()
         .map(|workout| workout.render().unwrap())
@@ -61,15 +57,14 @@ pub struct WorkoutAggregate {
     pub aggregation_unit: Option<f64>,
     pub total_duration: Option<PgInterval>,
     pub total_distance: Option<BigDecimal>,
-    pub total_tss: Option<BigDecimal>
+    pub total_tss: Option<BigDecimal>,
 }
 
 #[derive(Deserialize)]
 pub struct WorkoutSummaryRequest {
     user_name: String,
-    aggregation_interval: usize
+    aggregation_interval: usize,
 }
-
 
 pub async fn get_workout_summary(
     extract::State(pool): extract::State<PgPool>,
@@ -103,14 +98,33 @@ pub async fn get_workout_summary(
     .await
     .unwrap();
 
-    let mut trimmed: Vec<WeeklySummary> = workouts
-        .into_iter()
-        .map(|workout| workout.into())
+    let padded = (1..52)
+        .map(|kw| {
+            match workouts
+                .iter()
+                .filter(|wo| wo.aggregation_unit == kw)
+                .first()
+            {
+                Some(result) => return result,
+                None => {
+                    return WorkoutAggregate {
+                        aggregation_unit: Some(kw as f64),
+                        total_duration: Some(PgInterval {
+                            months: 0,
+                            days: 0,
+                            microseconds: 0,
+                        }),
+                        total_distance: Some(BigDecimal::default()),
+                        total_tss: Some(BigDecimal::default()),
+                    }
+                }
+            }
+        })
         .collect();
 
-    let rendered: Vec<String> = trimmed
-        .iter()
-        .map(|workout| workout.render().unwrap())
+    let mut rendered: Vec<WeeklySummary> = padded
+        .into_iter()
+        .map(|workout| workout.into().render().unwrap())
         .collect();
 
     Html(rendered.join("\n"))
